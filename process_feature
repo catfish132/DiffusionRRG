@@ -1,0 +1,1 @@
+python tools/create_feats.py --infeats /home/jinyuda/dataset/xmodaler/mscoco/object_feature/trainval/karpathy_train_resnet101_faster_rcnn_genome.tsv.0 --outfolder /home/jinyuda/dataset/xmodaler/mscoco/object_feature/processed_updown/
