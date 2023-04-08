@@ -6,7 +6,7 @@ DATASETS:
 
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 16
+  TRAIN_BATCH_SIZE: 128
   SEQ_PER_SAMPLE: 5
 
   CASCADED_FILE: "{path_to_stage1_rl_prediction}"

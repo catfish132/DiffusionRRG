@@ -73,4 +73,4 @@ if __name__ == "__main__":
         machine_rank=args.machine_rank,
         dist_url=args.dist_url,
         args=(args,),
-    )
+    )  # test

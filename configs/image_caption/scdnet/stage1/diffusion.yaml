@@ -6,10 +6,10 @@ DATASETS:
 
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 16
-  TEST_BATCH_SIZE: 32
-  NUM_WORKERS: 4
-  FEATS_FOLDER: "/home/jinyuda/dataset/xmodaler/mscoco/object_feature/processed_updown/"
+  TRAIN_BATCH_SIZE: 128
+  TEST_BATCH_SIZE: 128
+  NUM_WORKERS: 16
+  FEATS_FOLDER: "/home/jinyuda/dataset/xmodaler/mscoco/clip_grid/CLIP_RN101_49/"
   ANNO_FOLDER:  '/home/jinyuda/dataset/xmodaler/mscoco/'
   SEQ_PER_SAMPLE: 5
   MAX_FEAT_NUM: 50
@@ -31,6 +31,8 @@ MODEL:
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 20
   USE_EMA: True
+  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/output/stage1/Refxe/model_Epoch_00015_Iter_0013274.pth"
+#  RESUME: "/home/jinyuda/Try/SCD-Net-main/output/stage1/Refxe/"
 
 #################################### Token embedding ####################################
   TOKEN_EMBED:
@@ -70,7 +72,7 @@ SOLVER:
   EPOCH: 60
   CHECKPOINT_PERIOD: 1
   EVAL_PERIOD: 1
-  BASE_LR: 0.0005
+  BASE_LR: 0.002
   BIAS_LR_FACTOR: 1.0
   WEIGHT_DECAY: 0.0
   WEIGHT_DECAY_NORM: 0.0

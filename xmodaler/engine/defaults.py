@@ -54,6 +54,7 @@ __all__ = [
     "DefaultTrainer",
 ]
 
+
 def default_argument_parser(epilog=None):
     """
     Create a parser with some common arguments used by X-modaler users.
@@ -66,7 +67,7 @@ def default_argument_parser(epilog=None):
     """
     parser = argparse.ArgumentParser(
         epilog=epilog
-        or f"""
+               or f"""
 Examples:
 
 Run on single machine:
@@ -86,7 +87,7 @@ Run on multiple machines:
         "--resume",
         action="store_true",
         help="Whether to attempt to resume from the checkpoint directory. "
-        "See documentation of `DefaultTrainer.resume_or_load()` for what it means.",
+             "See documentation of `DefaultTrainer.resume_or_load()` for what it means.",
     )
     parser.add_argument("--eval-only", action="store_true", help="perform evaluation only")
     parser.add_argument("--num-gpus", type=int, default=1, help="number of gpus *per machine*")
@@ -103,18 +104,19 @@ Run on multiple machines:
         "--dist-url",
         default="tcp://127.0.0.1:{}".format(port),
         help="initialization URL for pytorch distributed backend. See "
-        "https://pytorch.org/docs/stable/distributed.html for details.",
+             "https://pytorch.org/docs/stable/distributed.html for details.",
     )
     parser.add_argument(
         "opts",
         help="Modify config options by adding 'KEY VALUE' pairs at the end of the command. "
-        "See config references at "
-        "https://detectron2.readthedocs.io/modules/config.html#config-references",
+             "See config references at "
+             "https://detectron2.readthedocs.io/modules/config.html#config-references",
         default=None,
         nargs=argparse.REMAINDER,
     )
     parser.add_argument('--debug', action='store_true')
-    return parser    
+    return parser
+
 
 def default_setup(cfg, args):
     """
@@ -164,6 +166,7 @@ def default_setup(cfg, args):
     if not (hasattr(args, "eval_only") and args.eval_only):
         torch.backends.cudnn.benchmark = cfg.CUDNN_BENCHMARK
 
+
 def default_writers(output_dir: str, max_iter: Optional[int] = None):
     """
     Build a list of :class:`EventWriter` to be used.
@@ -183,6 +186,7 @@ def default_writers(output_dir: str, max_iter: Optional[int] = None):
         JSONWriter(os.path.join(output_dir, "metrics.json")),
         TensorboardXWriter(output_dir),
     ]
+
 
 @ENGINE_REGISTRY.register()
 class DefaultTrainer(TrainerBase):
@@ -237,7 +241,7 @@ class DefaultTrainer(TrainerBase):
         logger = logging.getLogger("xmodaler")
         if not logger.isEnabledFor(logging.INFO):  # setup_logger is not called for d2
             setup_logger()
-        #cfg = DefaultTrainer.auto_scale_workers(cfg, comm.get_world_size())
+        # cfg = DefaultTrainer.auto_scale_workers(cfg, comm.get_world_size())
 
         # Assume these objects must be constructed in this order.
         model = self.build_model(cfg)
@@ -269,11 +273,11 @@ class DefaultTrainer(TrainerBase):
         self.losses = self.build_losses(cfg)
         self.scheduler = self.build_lr_scheduler(cfg, self.optimizer, self.iters_per_epoch)
         self.ss_prob = 0.0
-        
+
         # For training, wrap with DDP. But don't need this for inference.
         if comm.get_world_size() > 1:
             model = DistributedDataParallel(
-                model, find_unused_parameters=True, 
+                model, find_unused_parameters=True,
                 device_ids=[comm.get_local_rank()], broadcast_buffers=False
             )
         self.model = model
@@ -313,10 +317,10 @@ class DefaultTrainer(TrainerBase):
             hooks.IterationTimer(),
             hooks.LRScheduler(),
             hooks.ScheduledSampling(
-                start_iter = cfg.SCHEDULED_SAMPLING.START_EPOCH * self.iters_per_epoch, 
-                inc_every_iter = cfg.SCHEDULED_SAMPLING.INC_EVERY_EPOCH * self.iters_per_epoch, 
-                inc_prob = cfg.SCHEDULED_SAMPLING.INC_PROB, 
-                max_prob = cfg.SCHEDULED_SAMPLING.MAX_PROB
+                start_iter=cfg.SCHEDULED_SAMPLING.START_EPOCH * self.iters_per_epoch,
+                inc_every_iter=cfg.SCHEDULED_SAMPLING.INC_EVERY_EPOCH * self.iters_per_epoch,
+                inc_prob=cfg.SCHEDULED_SAMPLING.INC_PROB,
+                max_prob=cfg.SCHEDULED_SAMPLING.MAX_PROB
             ),
             hooks.ModelWeightsManipulating()
         ]
@@ -326,7 +330,8 @@ class DefaultTrainer(TrainerBase):
         # This is not always the best: if checkpointing has a different frequency,
         # some checkpoints may have more precise statistics than others.
         if comm.is_main_process():
-            ret.append(hooks.PeriodicCheckpointer(self.checkpointer, cfg.SOLVER.CHECKPOINT_PERIOD * self.iters_per_epoch))
+            ret.append(
+                hooks.PeriodicCheckpointer(self.checkpointer, cfg.SOLVER.CHECKPOINT_PERIOD * self.iters_per_epoch))
 
         def test_and_save_results(epoch):
             eval_results = self.test(self.cfg, self.model, self.test_data_loader, self.test_evaluator, epoch)
@@ -359,42 +364,42 @@ class DefaultTrainer(TrainerBase):
         if self.val_data_loader is not None:
             ret.append(
                 hooks.EvalHook(
-                    eval_period = cfg.SOLVER.EVAL_PERIOD, 
-                    eval_start = cfg.INFERENCE.VAL_EVAL_START,
-                    eval_function = val_and_save_results, 
-                    iters_per_epoch = self.iters_per_epoch,
-                    stage = 'val',
+                    eval_period=cfg.SOLVER.EVAL_PERIOD,
+                    eval_start=cfg.INFERENCE.VAL_EVAL_START,
+                    eval_function=val_and_save_results,
+                    iters_per_epoch=self.iters_per_epoch,
+                    stage='val',
                     multi_gpu_eval=(cfg.ENGINE.NAME.startswith("SingleStreamRetrieval"))
                 ))
             if self.ema is not None:
                 ret.append(
                     hooks.EvalHook(
-                        eval_period = cfg.SOLVER.EVAL_PERIOD, 
-                        eval_start = cfg.INFERENCE.VAL_EVAL_START,
-                        eval_function = val_ema_and_save_results, 
-                        iters_per_epoch = self.iters_per_epoch,
-                        stage = 'val_ema',
+                        eval_period=cfg.SOLVER.EVAL_PERIOD,
+                        eval_start=cfg.INFERENCE.VAL_EVAL_START,
+                        eval_function=val_ema_and_save_results,
+                        iters_per_epoch=self.iters_per_epoch,
+                        stage='val_ema',
                         multi_gpu_eval=(cfg.ENGINE.NAME.startswith("SingleStreamRetrieval"))
                     ))
 
         if self.test_data_loader is not None:
             ret.append(
                 hooks.EvalHook(
-                    eval_period = cfg.SOLVER.EVAL_PERIOD, 
-                    eval_start = cfg.INFERENCE.TEST_EVAL_START,
-                    eval_function = test_and_save_results, 
-                    iters_per_epoch = self.iters_per_epoch,
-                    stage = 'test',
+                    eval_period=cfg.SOLVER.EVAL_PERIOD,
+                    eval_start=cfg.INFERENCE.TEST_EVAL_START,
+                    eval_function=test_and_save_results,
+                    iters_per_epoch=self.iters_per_epoch,
+                    stage='test',
                     multi_gpu_eval=(cfg.ENGINE.NAME.startswith("SingleStreamRetrieval"))
                 ))
             if self.ema is not None:
                 ret.append(
                     hooks.EvalHook(
-                        eval_period = cfg.SOLVER.EVAL_PERIOD, 
-                        eval_start = cfg.INFERENCE.TEST_EVAL_START,
-                        eval_function = test_ema_and_save_results, 
-                        iters_per_epoch = self.iters_per_epoch,
-                        stage = 'test_ema',
+                        eval_period=cfg.SOLVER.EVAL_PERIOD,
+                        eval_start=cfg.INFERENCE.TEST_EVAL_START,
+                        eval_function=test_ema_and_save_results,
+                        iters_per_epoch=self.iters_per_epoch,
+                        stage='test_ema',
                         multi_gpu_eval=(cfg.ENGINE.NAME.startswith("SingleStreamRetrieval"))
                     ))
 
@@ -461,16 +466,16 @@ class DefaultTrainer(TrainerBase):
             self.scheduler.load_state_dict(state_dict["scheduler"])
         if self.ema is not None and "ema" in state_dict:
             if comm.get_world_size() == 1:
-                valid_ema = {k[7:] if k.startswith('module.module.') else k : v for k,v in state_dict["ema"].items()}
+                valid_ema = {k[7:] if k.startswith('module.module.') else k: v for k, v in state_dict["ema"].items()}
                 self.ema.load_state_dict(valid_ema)
             else:
                 self.ema.load_state_dict(state_dict["ema"])
 
     def _write_metrics(
-        self,
-        loss_dict: Dict[str, torch.Tensor],
-        data_time: float,
-        prefix: str = "",
+            self,
+            loss_dict: Dict[str, torch.Tensor],
+            data_time: float,
+            prefix: str = "",
     ):
         """
         Args:
@@ -480,10 +485,10 @@ class DefaultTrainer(TrainerBase):
         metrics_dict = {}
         for k, v in loss_dict.items():
             if isinstance(v, torch.Tensor):
-                metrics_dict.update({ k: v.detach().cpu().item() })
+                metrics_dict.update({k: v.detach().cpu().item()})
             else:
-                metrics_dict.update({ k: v })
-        #metrics_dict = {k: v.detach().cpu().item() for k, v in loss_dict.items()}
+                metrics_dict.update({k: v})
+        # metrics_dict = {k: v.detach().cpu().item() for k, v in loss_dict.items()}
         metrics_dict["data_time"] = data_time
 
         # Gather metrics among all workers for logging
@@ -552,7 +557,7 @@ class DefaultTrainer(TrainerBase):
             data = next(self._train_data_loader_iter)
         except StopIteration:
             if comm.get_world_size() > 1:
-                self.train_data_loader.sampler.set_epoch(self.iter//self.iters_per_epoch)
+                self.train_data_loader.sampler.set_epoch(self.iter // self.iters_per_epoch)
             self._train_data_loader_iter = iter(self.train_data_loader)
             data = next(self._train_data_loader_iter)
 

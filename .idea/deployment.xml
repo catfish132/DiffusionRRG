@@ -72,6 +72,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="jinyuda@111.1.136.92:23335 (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/jinyuda/Try/SCD-Net-main" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="jyd@125.33.255.110:31123 (2)">
         <serverdata>
           <mappings>

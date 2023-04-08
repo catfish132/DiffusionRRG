@@ -14,33 +14,23 @@ from xmodaler.config import kfg
 from xmodaler.functional import read_np, dict_as_tensor, boxes_to_locfeats
 from ..build import DATASETS_REGISTRY
 
-__all__ = ["MSCoCoDataset", "MSCoCoSampleByTxtDataset"]
+__all__ = ["RRGDataset"]
 
 
 @DATASETS_REGISTRY.register()
-class MSCoCoDataset:
+class RRGDataset:
     @configurable
     def __init__(
             self,
-            stage: str,
             anno_file: str,
-            seq_per_img: int,
-            max_feat_num: int,
             max_seq_len: int,
-            feats_folder: str,
-            relation_file: str,
-            gv_feat_file: str,
-            attribute_file: str
+            image_folder: str,
+            tokenizer_path:str
     ):
-        self.stage = stage
         self.anno_file = anno_file
-        self.seq_per_img = seq_per_img
-        self.max_feat_num = max_feat_num
-        self.feats_folder = feats_folder
+        self.feats_folder = image_folder
         self.max_seq_len = max_seq_len
-        self.relation_file = relation_file
-        self.gv_feat_file = gv_feat_file
-        self.attribute_file = attribute_file
+        self.tokenizer_path = tokenizer_path
 
     @classmethod
     def from_config(cls, cfg, stage: str = "train"):
@@ -56,14 +46,8 @@ class MSCoCoDataset:
             ann_file = ann_files[stage]
 
         ret = {
-            "stage": stage,
             "anno_file": ann_file,
-            "seq_per_img": cfg.DATALOADER.SEQ_PER_SAMPLE,
-            "max_feat_num": cfg.DATALOADER.MAX_FEAT_NUM,
-            "feats_folder": cfg.DATALOADER.FEATS_FOLDER,
-            "relation_file": cfg.DATALOADER.RELATION_FILE,
-            "gv_feat_file": cfg.DATALOADER.GV_FEAT_FILE,
-            "attribute_file": cfg.DATALOADER.ATTRIBUTE_FILE,
+            "image_folder": cfg.DATALOADER.IMAGE_FOLDER,
             "max_seq_len": cfg.MODEL.MAX_SEQ_LEN
         }
         return ret
@@ -72,20 +56,11 @@ class MSCoCoDataset:
         return datalist
 
     def load_data(self, cfg):
-        def _load_pkl_file(filepath):
-            return pickle.load(open(filepath, 'rb'), encoding='bytes') if len(filepath) > 0 else None
+        annotation = pickle.load(open(self.anno_file, 'rb'), encoding='bytes')
+        tokenizer = pickle.load(open(self.tokenizer_path,'rb'), encoding='bytes')
 
-        if self.stage == 'test' and cfg.DATALOADER.INFERENCE_TRAIN == True:
-            datalist = []
-            for split in ['train', 'test']:
-                anno_file = self.anno_file.format(split)
-                tmp_datalist = pickle.load(open(anno_file, 'rb'), encoding='bytes')
-                datalist.extend(tmp_datalist)
-        else:
-            datalist = pickle.load(open(self.anno_file, 'rb'), encoding='bytes')
-
-        if cfg.DEBUG:
-            datalist = datalist[:100]
+        # if cfg.DEBUG:
+        #     datalist = datalist[:100]
         datalist = self._preprocess_datalist(datalist)
         ext_data = {
             "relation": _load_pkl_file(self.relation_file),
@@ -176,46 +151,3 @@ class MSCoCoDataset:
 
         dict_as_tensor(ret)
         return ret
-
-
-@DATASETS_REGISTRY.register()
-class MSCoCoSampleByTxtDataset(MSCoCoDataset):
-    @configurable
-    def __init__(
-            self,
-            stage: str,
-            anno_file: str,
-            seq_per_img: int,
-            max_feat_num: int,
-            max_seq_len: int,
-            feats_folder: str,
-            relation_file: str,
-            gv_feat_file: str,
-            attribute_file: str
-    ):
-        super(MSCoCoSampleByTxtDataset, self).__init__(
-            stage,
-            anno_file,
-            seq_per_img,
-            max_feat_num,
-            max_seq_len,
-            feats_folder,
-            relation_file,
-            gv_feat_file,
-            attribute_file
-        )
-        assert self.seq_per_img == 1
-
-    def _preprocess_datalist(self, datalist):
-        if self.stage == 'train':
-            expand_datalist = []
-            for data in tqdm(datalist, desc='Expand COCO Dataset'):
-                for token_id, target_id in zip(data['tokens_ids'], data['target_ids']):
-                    expand_datalist.append({
-                        'image_id': data['image_id'],
-                        'tokens_ids': np.expand_dims(token_id, axis=0),
-                        'target_ids': np.expand_dims(target_id, axis=0)
-                    })
-            return expand_datalist
-        else:
-            return datalist
