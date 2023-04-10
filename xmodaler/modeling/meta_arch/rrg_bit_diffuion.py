@@ -7,7 +7,8 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 import torch.nn.functional as F
-
+import torch
+import torchvision.models as models
 from random import random
 
 from xmodaler.config import configurable
@@ -17,11 +18,11 @@ from xmodaler.functional import pad_tensor, dict_to_cuda, flat_list_of_lists
 from .transformer_enc_dec import TransformerEncoderDecoder
 from .build import META_ARCH_REGISTRY
 
-__all__ = ["BitDiffusionTransformerEncoderDecoder"]
+__all__ = ["RrgBitDiffusion"]
 
 
 @META_ARCH_REGISTRY.register()
-class BitDiffusionTransformerEncoderDecoder(TransformerEncoderDecoder):
+class RrgBitDiffusion(TransformerEncoderDecoder):
     @configurable
     def __init__(
             self,
@@ -51,6 +52,10 @@ class BitDiffusionTransformerEncoderDecoder(TransformerEncoderDecoder):
             beam_searcher=beam_searcher,
             v_predictor=v_predictor
         )
+        model = models.resnet101(pretrained=True)
+        modules = list(model.children())[:-2]
+        self.visual_backbone = nn.Sequential(*modules)
+        self.avg_fnt = torch.nn.AvgPool2d(kernel_size=7, stride=1, padding=0)
         self.log_snr = log_snr
 
     @classmethod
@@ -68,8 +73,20 @@ class BitDiffusionTransformerEncoderDecoder(TransformerEncoderDecoder):
         })
         return ret
 
+    def reshape_feat(self, x):
+        batch_size, feat_size, _, _ = x.shape
+        return x.reshape(batch_size, feat_size, -1).permute(0, 2, 1)
+
     def _forward(self, batched_inputs):
         inputs = batched_inputs
+        att_feat = self.reshape_feat(self.visual_backbone(batched_inputs[kfg.IMAGES]))
+        if kfg.IMAGES2 in batched_inputs:
+            att_feat2 = self.reshape_feat(self.visual_backbone(batched_inputs[kfg.IMAGES2]))
+            att_feat = torch.cat([att_feat, att_feat2], dim=1)
+        att_feat, att_mask = pad_tensor(att_feat, padding_value=0, use_mask=True)
+        batched_inputs[kfg.ATT_FEATS] = att_feat
+        batched_inputs[kfg.ATT_MASKS] = att_mask.to(att_feat.device)
+
         masks = self.get_extended_attention_mask(batched_inputs)
         inputs.update(masks)
 

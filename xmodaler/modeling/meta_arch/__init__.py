@@ -13,4 +13,6 @@ from .bit_diffusion_ref_transformer_enc_dec import BitDiffusionRefTransformerEnc
 from .tden import TDENBiTransformer, TDENPretrain, TDENCaptioner
 from .uniter import UniterPretrain, UniterForMMUnderstanding
 
+from .rrg_bit_diffuion import RrgBitDiffusion
+
 __all__ = list(globals().keys())

@@ -20,7 +20,7 @@ ENGINE:
 ######################################### MODEL #########################################
 MODEL:
   VOCAB_SIZE: 10200 # include <BOS>/<EOS>
-  META_ARCHITECTURE: 'BitDiffusionTransformerEncoderDecoder'
+  META_ARCHITECTURE: 'RrgBitDiffusion'
   ENCODER: 'TransformerEncoder'
   ENCODER_DIM: 512
   DECODER: 'DiffusionTransformerDecoder'
