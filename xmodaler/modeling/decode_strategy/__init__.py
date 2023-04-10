@@ -10,5 +10,6 @@ from .ensemble_beam_searcher import EnsembleBeamSearcher
 
 from .diffusion_sampler import DiffusionSampler
 from .cascaded_diffusion_sampler import CascadedDiffusionSampler
+from .rrg_diffusion_sampler import RRGDiffusionSampler
 
 __all__ = list(globals().keys())

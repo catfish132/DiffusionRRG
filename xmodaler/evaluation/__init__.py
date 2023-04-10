@@ -10,3 +10,4 @@ from .coco_printer import COCOPrinter
 from .vqa_evaler import VQAEvaler
 from .vcr_evaler import VCREvaler
 from .retrieval_evaler import RetrievalEvaler
+from .rrg_evaler import RRGEvaler

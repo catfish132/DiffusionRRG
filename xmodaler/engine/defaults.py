@@ -260,13 +260,13 @@ class DefaultTrainer(TrainerBase):
             self.iters_per_epoch = len(self.train_data_loader)
             self._train_data_loader_iter = iter(self.train_data_loader)
 
-        if self.val_data_loader is not None:
+        if self.val_data_loader is not None:  # 设置验证器
             self.val_evaluator = build_evaluation(cfg, cfg.INFERENCE.VAL_ANNFILE, None)
         else:
             self.val_evaluator = None
 
-        if self.test_data_loader is not None:
-            self.test_evaluator = build_evaluation(cfg, cfg.INFERENCE.TEST_ANNFILE, cfg.OUTPUT_DIR)
+        if self.test_data_loader is not None:  # 设置验证器
+            self.test_evaluator = build_evaluation(cfg, cfg.INFERENCE.TEST_ANNFILE, cfg.OUTPUT_DIR)  # 传 测试json，输出文件夹
         else:
             self.test_evaluator = None
 
@@ -333,6 +333,7 @@ class DefaultTrainer(TrainerBase):
             ret.append(
                 hooks.PeriodicCheckpointer(self.checkpointer, cfg.SOLVER.CHECKPOINT_PERIOD * self.iters_per_epoch))
 
+        # 定义hooks中函数，用以初始化hooks
         def test_and_save_results(epoch):
             eval_results = self.test(self.cfg, self.model, self.test_data_loader, self.test_evaluator, epoch)
             return eval_results
@@ -535,7 +536,10 @@ class DefaultTrainer(TrainerBase):
 
                 outputs = res[kfg.OUTPUT]
                 for id, output in zip(ids, outputs):
-                    results.append({cfg.INFERENCE.ID_KEY: int(id), cfg.INFERENCE.VALUE: output})
+                    if cfg.MODEL.META_ARCHITECTURE != 'RrgBitDiffusion':
+                        results.append({cfg.INFERENCE.ID_KEY: int(id), cfg.INFERENCE.VALUE: output})
+                    else:
+                        results.append({cfg.INFERENCE.ID_KEY: id, cfg.INFERENCE.VALUE: output})
 
         if evaluator is not None:
             eval_res = evaluator.eval(results, epoch)
