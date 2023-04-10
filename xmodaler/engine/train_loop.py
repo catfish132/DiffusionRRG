@@ -44,7 +44,7 @@ class HookBase:
            If the hook takes non-trivial time, it is strongly recommended to
            implement the hook in :meth:`after_step` instead of :meth:`before_step`.
            The convention is that :meth:`before_step` should only take negligible time.
-
+            # 尽量把耗时长的hook放在before_step。同一个函数可以同时在before和after中实现。
            Following this convention will allow hooks that do care about the difference
            between :meth:`before_step` and :meth:`after_step` (e.g., timer) to
            function properly.
@@ -91,7 +91,7 @@ class HookBase:
 class TrainerBase:
     """
     Base class for iterative trainer with hooks.
-
+    # 这里只定义了训练的循环，子类可以通过定义hook来扩展训练循环
     The only assumption we made here is: the training runs in a loop.
     A subclass can implement what the loop is.
     We made no assumptions about the existence of dataloader, optimizer, model, etc.

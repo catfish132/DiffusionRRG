@@ -74,7 +74,7 @@ class DiffusionSampler(DecodeStrategy):
         return ret
 
     def _forward(self, batched_inputs, model):
-        batch_size = batched_inputs[kfg.ATT_FEATS].size(0)
+        batch_size = batched_inputs[kfg.U_TOKENS_IDS].size(0)
 
         inputs = batched_inputs
         masks = model.get_extended_attention_mask(batched_inputs)
@@ -113,7 +113,7 @@ class DiffusionSampler(DecodeStrategy):
     @torch.no_grad()
     def ddpm_sample(self, model, shape, inputs):
         (batch_size, seq_length, bit_dim) = shape
-        device = inputs[kfg.ATT_FEATS].device
+        device = inputs[kfg.U_TOKENS_IDS].device
 
         time_pairs = self.get_sampling_timesteps(batch_size, device = device)
 

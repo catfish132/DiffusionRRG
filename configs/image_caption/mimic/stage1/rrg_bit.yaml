@@ -6,10 +6,10 @@ DATASETS:
 
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 32
-  TEST_BATCH_SIZE: 32
+  TRAIN_BATCH_SIZE: 128
+  TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
-  ANNO_FOLDER:  "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
+  ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
   SEQ_PER_SAMPLE: 3
   IMAGE_PATH: '/home/jinyuda/dataset/medic/mimic_cxr/images/'
 
@@ -19,7 +19,7 @@ ENGINE:
 
 ######################################### MODEL #########################################
 MODEL:
-  VOCAB_SIZE: 10200 # include <BOS>/<EOS>
+  VOCAB_SIZE: 4336 # include <BOS>/<EOS>  4336 for mimic(with 4335words in vecabulary) 761 for iu(with 760words in vecabulary）
   META_ARCHITECTURE: 'RrgBitDiffusion'
   ENCODER: 'TransformerEncoder'
   ENCODER_DIM: 512
@@ -27,10 +27,11 @@ MODEL:
   DECODER_DIM: 512
   PREDICTOR: 'BitDiffusionPredictor'
   PRED_DROPOUT: 0.1
-  MAX_SEQ_LEN: 20
+  MAX_SEQ_LEN: 100
   USE_EMA: True
+#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/xe/model_Epoch_00020_Iter_0042299.pth"
 
-#################################### Token embedding ####################################
+  #################################### Token embedding ####################################
   TOKEN_EMBED:
     NAME: 'BitEmbedding'
     DIM: 512
@@ -40,7 +41,7 @@ MODEL:
     POSITION: 'NNEmbeddingEncoding'
     TYPE_VOCAB_SIZE: 1 # 2 type are process in two different token_embed module
 
-#################################### Visual embedding ####################################
+  #################################### Visual embedding ####################################
   VISUAL_EMBED:
     NAME: 'VisualBaseEmbedding'
     IN_DIM: 2048
@@ -48,8 +49,8 @@ MODEL:
     ACTIVATION: 'relu'
     USE_NORM: True
     DROPOUT: 0.5
-    
-####################################### BERT ############################################
+
+  ####################################### BERT ############################################
   BERT:
     HIDDEN_SIZE: 512
     HIDDEN_DROPOUT_PROB: 0.1
@@ -61,14 +62,14 @@ MODEL:
     ATTENTION_PROBS_DROPOUT_PROB: 0.1
     NUM_HIDDEN_LAYERS: 3
     NUM_GENERATION_LAYERS: 3
-  
+
 ####################################### Optimizer #######################################
 SOLVER:
   NAME: 'Adam'
   EPOCH: 60
   CHECKPOINT_PERIOD: 1
   EVAL_PERIOD: 1
-  BASE_LR: 0.004  # 0.0005
+  BASE_LR: 0.0005  # 0.0005
   BIAS_LR_FACTOR: 1.0
   WEIGHT_DECAY: 0.0
   WEIGHT_DECAY_NORM: 0.0
@@ -76,12 +77,12 @@ SOLVER:
   MOMENTUM: 0.9
   DAMPENING: 0.0
   NESTEROV: 0.0
-  BETAS: [0.9, 0.999]
+  BETAS: [ 0.9, 0.999 ]
   EPS: 1e-8
   GRAD_CLIP: 0.1
   GRAD_CLIP_TYPE: 'value'
   NORM_TYPE: 2.0
-  
+
 ####################################### lr scheduler ####################################### 
 LR_SCHEDULER:
   NAME: 'NoamLR'
@@ -91,33 +92,33 @@ LR_SCHEDULER:
 
 ####################################### losses ####################################### 
 LOSSES:
-  NAMES: ['MSELoss', "LabelSmoothing"]
+  NAMES: [ 'MSELoss', "LabelSmoothing" ]
   LABELSMOOTHING: 0.1
 
 ####################################### scorer ####################################### 
 SCORER:
   NAME: 'BaseScorer'
-  TYPES: ['Cider']
-  WEIGHTS: [1.0]
-  GT_PATH: '/home/jinyuda/dataset/xmodaler/mscoco/mscoco_train_gts.pkl'
+  TYPES: [ 'Cider' ]
+  WEIGHTS: [ 1.0 ]
+  GT_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
   CIDER_CACHED: '/home/jinyuda/dataset/xmodaler/mscoco/mscoco_train_cider.pkl'
   EOS_ID: 0
 
 ####################################### decode strategy ####################################### 
 DECODE_STRATEGY:
-  NAME: 'DiffusionSampler'
+  NAME: 'RRGDiffusionSampler'
   DIFFUSION:
-    TIMESTEPS: 50
+    TIMESTEPS: 100
     TIME_DIFFERENCE: 0.0
     SAMPLE_NOISE: False
 
 ####################################### evaluation ####################################### 
 INFERENCE:
-  NAME: 'COCOEvaler'
-  VOCAB: '/home/jinyuda/dataset/xmodaler/mscoco/vocabulary.txt'
+  NAME: 'RRGEvaler'
+  VOCAB: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/vocabulary.txt"
   ID_KEY: 'image_id'
   VALUE: 'caption'
-  VAL_ANNFILE: '/home/jinyuda/dataset/xmodaler/mscoco/captions_val5k.json'
-  TEST_ANNFILE: '/home/jinyuda/dataset/xmodaler/mscoco/captions_test5k.json'
+  VAL_ANNFILE: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
+  TEST_ANNFILE: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
   GENERATION_MODE: True
 
