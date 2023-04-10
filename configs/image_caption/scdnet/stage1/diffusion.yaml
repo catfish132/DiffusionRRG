@@ -8,7 +8,7 @@ DATASETS:
 DATALOADER:
   TRAIN_BATCH_SIZE: 128
   TEST_BATCH_SIZE: 128
-  NUM_WORKERS: 16
+  NUM_WORKERS: 12
   FEATS_FOLDER: "/home/jinyuda/dataset/xmodaler/mscoco/clip_grid/CLIP_RN101_49/"
   ANNO_FOLDER:  '/home/jinyuda/dataset/xmodaler/mscoco/'
   SEQ_PER_SAMPLE: 5

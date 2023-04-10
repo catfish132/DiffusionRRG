@@ -18,7 +18,7 @@ ENGINE:
 
 ######################################### MODEL #########################################
 MODEL:
-  WEIGHTS: '/home/jinyuda/Try/SCD-Net-main/output/stage1/Refxe/model_final.pth'
+  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/output/stage1/rl/model_Epoch_00006_Iter_0005309.pth"
 
 ####################################### Optimizer #######################################
 SOLVER:

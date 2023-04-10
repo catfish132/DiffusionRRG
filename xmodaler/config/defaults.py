@@ -79,6 +79,8 @@ _C.DATALOADER.USE_KD_TOKENS_AS_INPUT = False
 
 _C.DATALOADER.FORCE_GUIDED = True
 
+_C.DATALOADER.IMAGE_PATH = '/home/jinyuda/dataset/medic/mimic_cxr/images/'
+
 # -----------------------------------------------------------------------------
 # Engine
 # -----------------------------------------------------------------------------

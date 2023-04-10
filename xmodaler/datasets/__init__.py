@@ -24,5 +24,6 @@ from .images.flickr30k_single_stream import Flickr30kDatasetForSingleStream, Fli
 from .videos.msvd import MSVDDataset
 from .videos.msrvtt import MSRVTTDataset
 
+from .images.rrg import RRGDiffusionDataset
 
 __all__ = [k for k in globals().keys() if not k.startswith("_")]

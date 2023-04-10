@@ -148,3 +148,8 @@ _K.U_TOKENS_IDS_BIT = 'U_TOKENS_IDS_BIT'
 _K.C_TOKENS_IDS_BIT = 'C_TOKENS_IDS_BIT'
 
 _K.RL_SAMPLE_FIX_TOKENS_IDS = 'RL_SAMPLE_FIX_TOKENS_IDS'
+
+######################################### RRG #####################################################
+
+_K.IMAGE_PATH = 'IMAGE_PATH'
+_K.IMAGES = 'IMAGES'

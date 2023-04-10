@@ -1,19 +1,17 @@
 ####################################### DATASETS #######################################
 DATASETS:
-  TRAIN: 'MSCoCoDiffusionDataset'
+  TRAIN: 'RRGDiffusionDataset'
   VAL: ''
-  TEST: 'MSCoCoDiffusionDataset'
+  TEST: 'RRGDiffusionDataset'
 
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 256
-  TEST_BATCH_SIZE: 256
-  NUM_WORKERS: 0
-  FEATS_FOLDER: "/home/jinyuda/dataset/xmodaler/mscoco/clip_grid/CLIP_RN101_49/"
-  ANNO_FOLDER:  '/home/jinyuda/dataset/xmodaler/mscoco/'
-  SEQ_PER_SAMPLE: 5
-  MAX_FEAT_NUM: 50
-  REF_SENT_FILE: "/home/jinyuda/dataset/xmodaler/mscoco/mscoco_clip_ret_sents.pkl"
+  TRAIN_BATCH_SIZE: 32
+  TEST_BATCH_SIZE: 32
+  NUM_WORKERS: 12
+  ANNO_FOLDER:  "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
+  SEQ_PER_SAMPLE: 3
+  IMAGE_PATH: '/home/jinyuda/dataset/medic/mimic_cxr/images/'
 
 ######################################### Engine #########################################
 ENGINE:

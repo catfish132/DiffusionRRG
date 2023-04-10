@@ -69,9 +69,9 @@ class MSCoCoDiffusionDataset(MSCoCoDataset):
         u_tokens_ids = [torch.roll(item, -1, dims=0).long() for item in ret[kfg.G_TOKENS_IDS]]
         u_ret = {
             kfg.U_TOKENS_IDS: u_tokens_ids,
-        }
-        del ret[kfg.G_TOKENS_IDS]
-        del ret[kfg.G_TARGET_IDS]
+        }  # U_TOKENS_IDS：去除了开头的0 token，因为不再需要了
+        del ret[kfg.G_TOKENS_IDS]  # G_TOKENS_IDS表示输入的token
+        del ret[kfg.G_TARGET_IDS]  # # G_TOKENS_IDS表示右移的token序列
         ret.update(u_ret)  # use U_TOKENS insted of G_TOKENS for non-autoregressive setting
 
         if kfg.C_TOKENS_IDS in ret and self.cas_rand_ratio > 0.0:

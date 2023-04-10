@@ -150,7 +150,7 @@ class MSCoCoDataset:
         if 'gv_feat' in dataset_dict:
             ret.update({kfg.GLOBAL_FEATS: dataset_dict['gv_feat']})
 
-        if self.stage != 'train':
+        if self.stage != 'train':  # 推理时使用
             g_tokens_type = np.zeros((self.max_seq_len,), dtype=np.int64)
             ret.update({kfg.G_TOKENS_TYPE: g_tokens_type})
             dict_as_tensor(ret)
