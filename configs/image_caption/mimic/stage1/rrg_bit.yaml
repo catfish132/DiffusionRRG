@@ -6,12 +6,13 @@ DATASETS:
 
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 128
+  TRAIN_BATCH_SIZE: 2
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
   SEQ_PER_SAMPLE: 3
   IMAGE_PATH: '/home/jinyuda/dataset/medic/mimic_cxr/images/'
+  SIMILAR_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mim_whole_bert.npy"
 
 ######################################### Engine #########################################
 ENGINE:

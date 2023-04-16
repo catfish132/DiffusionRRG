@@ -28,12 +28,14 @@ class RRGDiffusionDataset:
             self,
             stage: str,
             anno_folder: str,
+            similar_path: str,
             max_seq_len: int,
             image_path: str,
             cas_rand_ratio,
     ):
         self.stage = stage
         self.anno_folder = anno_folder  # 我们直接使用anno_folder 指向标注文件
+        self.similar_path = similar_path
         self.max_seq_len = max_seq_len
         self.image_path = image_path
         self.cas_rand_ratio = cas_rand_ratio
@@ -51,11 +53,13 @@ class RRGDiffusionDataset:
                 transforms.ToTensor(),
                 transforms.Normalize((0.485, 0.456, 0.406),
                                      (0.229, 0.224, 0.225))])
+        self.similar_file = np.load(self.similar_path, allow_pickle=True).item()
 
     @classmethod
     def from_config(cls, cfg, stage: str = "train"):
         ret = {"stage": stage,
                "anno_folder": cfg.DATALOADER.ANNO_FOLDER,
+               "similar_path": cfg.DATALOADER.SIMILAR_PATH,
                "max_seq_len": cfg.MODEL.MAX_SEQ_LEN,
                "image_path": cfg.DATALOADER.IMAGE_PATH,
                "cas_rand_ratio": cfg.DATALOADER.CASCADED_SENT_RAND_RATIO,
@@ -92,17 +96,20 @@ class RRGDiffusionDataset:
             image = self.transform(image)
             images.append(image)
 
-        if self.stage != 'train':  # 如果是推理模式就不需要提供token了，计算指标可能在后续会进行
+        if self.staged != 'train':  # 如果是推理模式就不需要提供token了，计算指标可能在后续会进行
             u_tokens_ids = np.array(dataset_dict['report'], dtype=np.int64)
             u_tokens_type = np.zeros(self.max_seq_len, dtype=np.int64)
         else:
             u_tokens_ids = np.array(dataset_dict['report'], dtype=np.int64)
             u_tokens_type = np.zeros((len(u_tokens_ids)), dtype=np.int64)
+        # 查找相似报告的特征
+        similar = [self.similar_file[similar_id] for similar_id in dataset_dict['similar']]
         ret = {
             kfg.IDS: id,
             kfg.U_TOKENS_IDS: u_tokens_ids,
             kfg.U_TOKENS_TYPE: u_tokens_type,
-            kfg.IMAGES: images
+            kfg.IMAGES: images,
+            kfg.SIMILAR: similar
         }
         if 'cascaded_tokens_ids' in dataset_dict:
             cascaded_tokens_ids = dataset_dict['cascaded_tokens_ids']

@@ -6,7 +6,7 @@ DATASETS:
 
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 128
+  TRAIN_BATCH_SIZE: 4
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   FEATS_FOLDER: "/home/jinyuda/dataset/xmodaler/mscoco/clip_grid/CLIP_RN101_49/"
@@ -31,8 +31,8 @@ MODEL:
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 20
   USE_EMA: True
-  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/output/stage1/Refxe/model_Epoch_00015_Iter_0013274.pth"
-#  RESUME: "/home/jinyuda/Try/SCD-Net-main/output/stage1/Refxe/"
+#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/output/stage1/Refxe/model_Epoch_00015_Iter_0013274.pth"
+
 
 #################################### Token embedding ####################################
   TOKEN_EMBED:

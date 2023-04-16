@@ -81,6 +81,8 @@ _C.DATALOADER.FORCE_GUIDED = True
 
 _C.DATALOADER.IMAGE_PATH = '/home/jinyuda/dataset/medic/mimic_cxr/images/'
 
+_C.DATALOADER.SIMILAR_PATH = "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mim_whole_bert.npy"
+
 # -----------------------------------------------------------------------------
 # Engine
 # -----------------------------------------------------------------------------
