@@ -1,0 +1,4 @@
+CUDA_VISIBLE_DEVICES=1 python train_net.py \
+--num-gpus 1 \
+--config-file configs/image_caption/mimic/stage1/rrg_bit_ref_CE.yaml \
+OUTPUT_DIR output/stage1/ref_ce

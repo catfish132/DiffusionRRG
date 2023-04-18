@@ -14,5 +14,6 @@ from .tden import TDENBiTransformer, TDENPretrain, TDENCaptioner
 from .uniter import UniterPretrain, UniterForMMUnderstanding
 
 from .rrg_bit_diffuion import RrgBitDiffusion
+from .rrg_bit_ref_diffuion import RrgBitRefDiffusion
 
 __all__ = list(globals().keys())

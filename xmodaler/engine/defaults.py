@@ -536,7 +536,7 @@ class DefaultTrainer(TrainerBase):
 
                 outputs = res[kfg.OUTPUT]
                 for id, output in zip(ids, outputs):
-                    if cfg.MODEL.META_ARCHITECTURE != 'RrgBitDiffusion':
+                    if cfg.MODEL.META_ARCHITECTURE not in ['RrgBitDiffusion', 'RrgBitRefDiffusion']:
                         results.append({cfg.INFERENCE.ID_KEY: int(id), cfg.INFERENCE.VALUE: output})
                     else:
                         results.append({cfg.INFERENCE.ID_KEY: id, cfg.INFERENCE.VALUE: output})

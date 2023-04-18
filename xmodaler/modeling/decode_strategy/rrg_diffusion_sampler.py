@@ -105,12 +105,16 @@ class RRGDiffusionSampler(DecodeStrategy):
             re_out = model.r_token_embed(inputs)
             inputs.update(re_out)
 
+        if hasattr(model, "similar_embed") and model.similar_embed is not None:
+            similar_out = model.similar_embed(inputs['similar'])
+            inputs['similar_embed'] = similar_out
+
         if kfg.C_TOKENS_IDS in inputs:
             cascaded_ids_bit = model.token_embed.get_bit_repr(inputs[kfg.C_TOKENS_IDS])
             inputs.update({kfg.C_TOKENS_IDS_BIT: cascaded_ids_bit})
 
         outputs, _ = self.ddpm_sample(model, (batch_size, self.max_seq_len, self.bit_dim), inputs)
-        outputs = outputs.clamp(0., 10199.).long()
+        outputs = outputs.clamp(0., 4335.).long()
 
         return {
             kfg.IDS: batched_inputs[kfg.IDS],

@@ -1,0 +1,125 @@
+####################################### DATASETS #######################################
+DATASETS:
+  TRAIN: 'RRGDiffusionDataset'
+  VAL: ''
+  TEST: 'RRGDiffusionDataset'
+
+###################################### DATALOADER ######################################
+DATALOADER:
+  TRAIN_BATCH_SIZE: 64
+  TEST_BATCH_SIZE: 128
+  NUM_WORKERS: 12
+  ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
+  SEQ_PER_SAMPLE: 3
+  IMAGE_PATH: '/home/jinyuda/dataset/medic/mimic_cxr/images/'
+  SIMILAR_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mim_whole_bert.npy"
+
+######################################### Engine #########################################
+ENGINE:
+  NAME: 'BitDiffusionTrainer'
+
+######################################### MODEL #########################################
+MODEL:
+  VOCAB_SIZE: 4336 # include <BOS>/<EOS>  4336 for mimic(with 4335words in vecabulary) 761 for iu(with 760words in vecabulary）
+  META_ARCHITECTURE: 'RrgBitRefDiffusion'
+  ENCODER: 'TransformerEncoder'
+  ENCODER_DIM: 512
+  DECODER: 'DiffusionTransformerDecoder'
+  DECODER_DIM: 512
+  PREDICTOR: 'BitDiffusionPredictor'
+  PRED_DROPOUT: 0.1
+  MAX_SEQ_LEN: 100
+  USE_EMA: True
+#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/xe_ref/model_Epoch_00029_Iter_0245397.pth"
+
+  #################################### Token embedding ####################################
+  TOKEN_EMBED:
+    NAME: 'BitEmbedding'
+    DIM: 512
+    ACTIVATION: 'none'
+    USE_NORM: True
+    DROPOUT: 0.1
+    POSITION: 'NNEmbeddingEncoding'
+    TYPE_VOCAB_SIZE: 1 # 2 type are process in two different token_embed module
+
+  #################################### Visual embedding ####################################
+  VISUAL_EMBED:
+    NAME: 'VisualBaseEmbedding'
+    IN_DIM: 2048
+    OUT_DIM: 512
+    ACTIVATION: 'relu'
+    USE_NORM: True
+    DROPOUT: 0.5
+
+  ####################################### BERT ############################################
+  BERT:
+    HIDDEN_SIZE: 512
+    HIDDEN_DROPOUT_PROB: 0.1
+    HIDDEN_ACT: "relu"
+    NUM_ATTENTION_HEADS: 8
+    INTERMEDIATE_SIZE: 2048
+    INTERMEDIATE_DROP: 0.1
+    FFN_DROPOUT_PROB: 0.1
+    ATTENTION_PROBS_DROPOUT_PROB: 0.1
+    NUM_HIDDEN_LAYERS: 3
+    NUM_GENERATION_LAYERS: 3
+
+####################################### Optimizer #######################################
+SOLVER:
+  NAME: 'Adam'
+  EPOCH: 60
+  CHECKPOINT_PERIOD: 1
+  EVAL_PERIOD: 1
+  BASE_LR: 0.0005  # 0.0005
+  BIAS_LR_FACTOR: 1.0
+  WEIGHT_DECAY: 0.0
+  WEIGHT_DECAY_NORM: 0.0
+  WEIGHT_DECAY_BIAS: 0.0
+  MOMENTUM: 0.9
+  DAMPENING: 0.0
+  NESTEROV: 0.0
+  BETAS: [ 0.9, 0.999 ]
+  EPS: 1e-8
+  GRAD_CLIP: 0.1
+  GRAD_CLIP_TYPE: 'value'
+  NORM_TYPE: 2.0
+
+####################################### lr scheduler ####################################### 
+LR_SCHEDULER:
+  NAME: 'NoamLR'
+  MODEL_SIZE: 512
+  FACTOR: 1.0
+  WARMUP: 20000
+
+####################################### losses ####################################### 
+LOSSES:
+  NAMES: [ 'MSELoss', "CrossEntropy" ]
+  LABELSMOOTHING: 0.1
+
+####################################### scorer ####################################### 
+SCORER:
+  NAME: 'BaseScorer'
+  TYPES: [ 'Cider' ]
+  WEIGHTS: [ 1.0 ]
+  GT_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
+  CIDER_CACHED: '/home/jinyuda/dataset/xmodaler/mscoco/mscoco_train_cider.pkl'
+  EOS_ID: 0
+
+####################################### decode strategy ####################################### 
+DECODE_STRATEGY:
+  NAME: 'RRGDiffusionSampler'
+  DIFFUSION:
+    TIMESTEPS: 100
+    TIME_DIFFERENCE: 0.0
+    SAMPLE_NOISE: False
+
+####################################### evaluation ####################################### 
+INFERENCE:
+  NAME: 'RRGEvaler'
+  VOCAB: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/vocabulary.txt"
+  ID_KEY: 'image_id'
+  VALUE: 'caption'
+  VAL_ANNFILE: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
+  TEST_ANNFILE: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
+  GENERATION_MODE: True
+

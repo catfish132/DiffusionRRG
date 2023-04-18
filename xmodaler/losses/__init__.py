@@ -14,3 +14,5 @@ from .triplet import BatchTriplet, Triplet
 from .semcomphder_loss import SemComphderLoss
 from .mse_loss import MSELoss
 from .sigmoid_cross_entropy import SigmoidCrossEntropy
+
+from .weight_cross_emtropy import WeightCrossEntropy
