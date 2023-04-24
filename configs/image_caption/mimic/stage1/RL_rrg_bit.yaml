@@ -1,0 +1,52 @@
+_BASE_: "rrg_bit.yaml"
+####################################### DATASETS #######################################
+DATASETS:
+  TRAIN: 'RRGDiffusionDataset'
+  VAL: ''
+  TEST: 'RRGDiffusionDataset'
+
+###################################### DATALOADER ######################################
+DATALOADER:
+  TRAIN_BATCH_SIZE: 128
+  TEST_BATCH_SIZE: 128
+  NUM_WORKERS: 12
+  ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
+  SEQ_PER_SAMPLE: 3
+  IMAGE_PATH: '/home/jinyuda/dataset/medic/mimic_cxr/images/'
+  SIMILAR_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mim_whole_bert.npy"
+
+######################################### Engine #########################################
+ENGINE:
+  NAME: 'RLDiffusionTrainer'
+
+######################################### MODEL #########################################
+MODEL:
+
+  WEIGHTS: "/home/jinyuda/rrg_diffusion_results/mimic_bit.pth"
+
+####################################### Optimizer #######################################
+SOLVER:
+  NAME: 'Adam'
+  EPOCH: 60
+  BASE_LR: 0.00001  # 0.00001
+
+
+####################################### lr scheduler ####################################### 
+LR_SCHEDULER:
+  NAME: 'FixLR'
+
+####################################### losses ####################################### 
+LOSSES:
+  NAMES: [ 'MSELoss', "LabelSmoothing" ]
+  LABELSMOOTHING: 0.1
+
+####################################### scorer ####################################### 
+SCORER:
+  NAME: 'Bleu4Scorer'
+  TYPES: [ 'Bleu-4' ]
+  WEIGHTS: [ 1.0 ]
+  GT_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gtid.pkl"
+#  CIDER_CACHED: '/home/jinyuda/dataset/xmodaler/mscoco/mscoco_train_cider.pkl'
+  EOS_ID: 0
+
+

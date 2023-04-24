@@ -39,8 +39,8 @@ class RLDiffusionTrainer(DefaultTrainer):
             self._train_data_loader_iter = iter(self.train_data_loader)
             data = next(self._train_data_loader_iter)
         data_time = time.perf_counter() - start
-
-        seq_per_img = data[0][kfg.SEQ_PER_SAMPLE].item()
+        if kfg.RL_SAMPLE_FIX_TOKENS_IDS in data:
+            seq_per_img = data[0][kfg.SEQ_PER_SAMPLE].item()
         data = comm.unwrap_model(self.model).preprocess_batch(data)
 
         outputs_dict = self.model(data)

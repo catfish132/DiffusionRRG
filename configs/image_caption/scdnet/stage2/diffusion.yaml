@@ -105,7 +105,7 @@ SCORER:
   TYPES: ['Cider']
   WEIGHTS: [1.0]
   GT_PATH: '../open_source_dataset/mscoco_dataset/mscoco_train_gts.pkl'
-  CIDER_CACHED: '../open_source_dataset/mscoco_dataset/mscoco_train_cider.pkl'
+#  CIDER_CACHED: '../open_source_dataset/mscoco_dataset/mscoco_train_cider.pkl'
   EOS_ID: 0
 
 ####################################### decode strategy ####################################### 

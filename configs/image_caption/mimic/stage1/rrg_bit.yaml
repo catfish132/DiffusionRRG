@@ -83,6 +83,7 @@ SOLVER:
   GRAD_CLIP: 0.1
   GRAD_CLIP_TYPE: 'value'
   NORM_TYPE: 2.0
+  WRITE_PERIOD: 200
 
 ####################################### lr scheduler ####################################### 
 LR_SCHEDULER:
