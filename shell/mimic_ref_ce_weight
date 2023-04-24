@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=2 python train_net.py \
+CUDA_VISIBLE_DEVICES=1 python train_net.py \
 --num-gpus 1 \
 --config-file configs/image_caption/mimic/stage1/rrg_bit_ref_CE_weight.yaml \
-OUTPUT_DIR output/stage1/ref_ce_weight
+OUTPUT_DIR rrgoutput/stage1/ref_ce_weight

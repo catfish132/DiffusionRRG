@@ -17,7 +17,7 @@ class WeightCrossEntropy(nn.Module):
         super(WeightCrossEntropy, self).__init__()
         weight = torch.ones((vocab_size,)).cuda()
         weight[0] = eos_wight
-        self.criterion = nn.CrossEntropyLoss(weight=weight, ignore_index=-1)
+        self.criterion = nn.CrossEntropyLoss(weight=weight,ignore_index=0)
         self.eos_id = eos_id
         self.loss_weight = loss_weight
 

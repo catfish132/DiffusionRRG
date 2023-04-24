@@ -8,7 +8,6 @@ from torch import nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-
 from einops import rearrange, repeat
 import numpy as np
 from tqdm import tqdm
@@ -17,25 +16,27 @@ from torch.special import expm1
 
 from xmodaler.config import configurable
 from xmodaler.config import kfg
-from xmodaler.functional import bits_to_decimal, beta_linear_log_snr, alpha_cosine_log_snr, log_snr_to_alpha_sigma, right_pad_dims_to, log
+from xmodaler.functional import bits_to_decimal, beta_linear_log_snr, alpha_cosine_log_snr, log_snr_to_alpha_sigma, \
+    right_pad_dims_to, log
 
 from .decode_strategy import DecodeStrategy
 from .build import DECODE_STRATEGY_REGISTRY
+
 
 @DECODE_STRATEGY_REGISTRY.register()
 class DiffusionSampler(DecodeStrategy):
 
     @configurable
     def __init__(
-        self,
-        timesteps,
-        time_difference,
-        log_snr,
-        vocab_size,
-        bit_scale,
-        apply_sigmoid_to_pred,
-        sample_noise,
-        **base_kwargs,
+            self,
+            timesteps,
+            time_difference,
+            log_snr,
+            vocab_size,
+            bit_scale,
+            apply_sigmoid_to_pred,
+            sample_noise,
+            **base_kwargs,
     ):
         super().__init__(**base_kwargs)
         self.timesteps = timesteps
@@ -93,8 +94,8 @@ class DiffusionSampler(DecodeStrategy):
 
         if kfg.C_TOKENS_IDS in inputs:
             cascaded_ids_bit = model.token_embed.get_bit_repr(inputs[kfg.C_TOKENS_IDS])
-            inputs.update({ kfg.C_TOKENS_IDS_BIT: cascaded_ids_bit })
-        
+            inputs.update({kfg.C_TOKENS_IDS_BIT: cascaded_ids_bit})
+
         outputs, _ = self.ddpm_sample(model, (batch_size, self.max_seq_len, self.bit_dim), inputs)
         outputs = outputs.clamp(0., 10199.).long()
 
@@ -104,10 +105,10 @@ class DiffusionSampler(DecodeStrategy):
         }
 
     def get_sampling_timesteps(self, batch, *, device):
-        times = torch.linspace(1., 0., self.timesteps + 1, device = device)
-        times = repeat(times, 't -> b t', b = batch)
-        times = torch.stack((times[:, :-1], times[:, 1:]), dim = 0)
-        times = times.unbind(dim = -1)
+        times = torch.linspace(1., 0., self.timesteps + 1, device=device)
+        times = repeat(times, 't -> b t', b=batch)
+        times = torch.stack((times[:, :-1], times[:, 1:]), dim=0)
+        times = times.unbind(dim=-1)
         return times
 
     @torch.no_grad()
@@ -115,16 +116,17 @@ class DiffusionSampler(DecodeStrategy):
         (batch_size, seq_length, bit_dim) = shape
         device = inputs[kfg.U_TOKENS_IDS].device
 
-        time_pairs = self.get_sampling_timesteps(batch_size, device = device)
+        time_pairs = self.get_sampling_timesteps(batch_size, device=device)
 
         txt = torch.randn(shape, device=device)
 
-        inputs[kfg.U_TOKENS_IDS] = torch.zeros((batch_size, seq_length), device=device).long() # init_u_tokens_ids_for_pos_embed
+        inputs[kfg.U_TOKENS_IDS] = torch.zeros((batch_size, seq_length),
+                                               device=device).long()  # init_u_tokens_ids_for_pos_embed
         x_start = None
         for time, time_next in time_pairs:
 
             # add the time delay
-            time_next = (time_next - self.time_difference).clamp(min = 0.)
+            time_next = (time_next - self.time_difference).clamp(min=0.)
             noise_cond = self.log_snr(time)
 
             # get predicted x0
@@ -143,15 +145,16 @@ class DiffusionSampler(DecodeStrategy):
 
             # get log(snr)
             log_snr = self.log_snr(time)  # gamma(t_now)
-            log_snr_next = self.log_snr(time_next) # gamma(t_next)
-            log_snr, log_snr_next = map(partial(right_pad_dims_to, txt), (log_snr, log_snr_next)) # reshape
+            log_snr_next = self.log_snr(time_next)  # gamma(t_next)
+            log_snr, log_snr_next = map(partial(right_pad_dims_to, txt), (log_snr, log_snr_next))  # reshape
 
             # get alpha sigma of time and next time
             alpha, sigma = log_snr_to_alpha_sigma(log_snr)
             alpha_next, sigma_next = log_snr_to_alpha_sigma(log_snr_next)
 
             # derive posterior mean and variance
-            c = -expm1(log_snr - log_snr_next)   # Computes the exponential of the elements minus 1: y_{i} = e^{x_{i}} - 1
+            c = -expm1(
+                log_snr - log_snr_next)  # Computes the exponential of the elements minus 1: y_{i} = e^{x_{i}} - 1
 
             mean = alpha_next * (txt * (1 - c) / alpha + c * x_start)
 

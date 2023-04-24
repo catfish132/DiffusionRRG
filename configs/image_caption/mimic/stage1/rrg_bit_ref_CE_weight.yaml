@@ -6,7 +6,7 @@ DATASETS:
 
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 64
+  TRAIN_BATCH_SIZE: 32
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
@@ -94,7 +94,7 @@ LR_SCHEDULER:
 ####################################### losses ####################################### 
 LOSSES:
   NAMES: [ 'MSELoss', "WeightCrossEntropy" ]
-  EOS_WEIGHT: 3.0
+  EOS_WEIGHT: 1.0
 
 ####################################### scorer ####################################### 
 SCORER:

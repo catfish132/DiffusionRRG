@@ -9,3 +9,4 @@ from .base_scorer import BaseScorer
 from .bert_tokenized_scorer import BertTokenizedScorer
 
 from .cider import Cider
+from .bleu4_scorer import Bleu4Scorer

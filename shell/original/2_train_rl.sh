@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1 python train_net.py --num-gpus 1 --config-file configs/image_caption/scdnet/stage1/diffusion_rl.yaml   OUTPUT_DIR output/stage1/rl
