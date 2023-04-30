@@ -4,9 +4,10 @@ DATASETS:
   VAL: ''
   TEST: 'RRGDiffusionDataset'
 
+OUTPUT_DIR: './rrg_output/stage1/mimic_ce_eos'
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 16
+  TRAIN_BATCH_SIZE: 128
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
@@ -21,7 +22,7 @@ ENGINE:
 ######################################### MODEL #########################################
 MODEL:
   VOCAB_SIZE: 4336 # include <BOS>/<EOS>  4336 for mimic(with 4335words in vecabulary) 761 for iu(with 760words in vecabulary）
-  META_ARCHITECTURE: 'RrgBitRefDiffusion'
+  META_ARCHITECTURE: 'RrgBitDiffusion'
   ENCODER: 'TransformerEncoder'
   ENCODER_DIM: 512
   DECODER: 'DiffusionTransformerDecoder'
@@ -30,7 +31,7 @@ MODEL:
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 100
   USE_EMA: True
-  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/xe_ref/model_Epoch_00029_Iter_0245397.pth"
+#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/xe_ref/model_Epoch_00029_Iter_0245397.pth"
 
   #################################### Token embedding ####################################
   TOKEN_EMBED:
@@ -83,6 +84,7 @@ SOLVER:
   GRAD_CLIP: 0.1
   GRAD_CLIP_TYPE: 'value'
   NORM_TYPE: 2.0
+  WRITE_PERIOD: 200
 
 ####################################### lr scheduler ####################################### 
 LR_SCHEDULER:
@@ -93,8 +95,8 @@ LR_SCHEDULER:
 
 ####################################### losses ####################################### 
 LOSSES:
-  NAMES: [ 'MSELoss', "LabelSmoothing" ]
-  LABELSMOOTHING: 0.1
+  NAMES: [ 'MSELoss', "EosCrossEntropy" ]
+#  EOS_WEIGHT: 1.0
 
 ####################################### scorer ####################################### 
 SCORER:

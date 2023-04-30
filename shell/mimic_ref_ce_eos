@@ -1,0 +1,3 @@
+CUDA_VISIBLE_DEVICES=1 python train_net.py \
+--num-gpus 1 \
+--config-file configs/image_caption/mimic/stage1/rrg_ref_CE_eos.yaml
