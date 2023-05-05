@@ -30,7 +30,7 @@ MODEL:
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 100
   USE_EMA: True
-#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/xe/model_Epoch_00020_Iter_0042299.pth"
+  WEIGHTS: "/hoAAme/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_ce_eos/model_Epoch_00013_Iter_0027494.pth"
 
   #################################### Token embedding ####################################
   TOKEN_EMBED:

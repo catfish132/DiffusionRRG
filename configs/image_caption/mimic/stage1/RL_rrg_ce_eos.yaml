@@ -1,10 +1,10 @@
-_BASE_: "rrg_bit.yaml"
+_BASE_: "rrg_ce_eos.yaml"
 ####################################### DATASETS #######################################
 DATASETS:
   TRAIN: 'RRGDiffusionDataset'
   VAL: ''
   TEST: 'RRGDiffusionDataset'
-
+OUTPUT_DIR: './rrg_output/stage1/mimic_ce_eos_rl'
 ###################################### DATALOADER ######################################
 DATALOADER:
   TRAIN_BATCH_SIZE: 128
@@ -22,7 +22,7 @@ ENGINE:
 ######################################### MODEL #########################################
 MODEL:
 
-  WEIGHTS: "/home/jinyuda/rrg_diffusion_results/mimic_bit.pth"
+  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_ce_eos/model_Epoch_00013_Iter_0027494.pth"
 
 ####################################### Optimizer #######################################
 SOLVER:
@@ -35,10 +35,8 @@ SOLVER:
 LR_SCHEDULER:
   NAME: 'FixLR'
 
-####################################### losses ####################################### 
-LOSSES:
-  NAMES: [ 'MSELoss', "LabelSmoothing" ]
-  LABELSMOOTHING: 0.1
+####################################### losses #######################################
+
 
 ####################################### scorer ####################################### 
 SCORER:
@@ -49,4 +47,4 @@ SCORER:
 #  CIDER_CACHED: '/home/jinyuda/dataset/xmodaler/mscoco/mscoco_train_cider.pkl'
   EOS_ID: 0
 
-c
+

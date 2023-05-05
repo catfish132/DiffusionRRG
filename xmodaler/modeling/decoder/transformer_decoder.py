@@ -10,7 +10,7 @@ from xmodaler.config import configurable
 from xmodaler.config import CfgNode as CN
 from xmodaler.config import kfg
 from .decoder import Decoder
-from ..layers.bert import BertGenerationLayer
+from ..layers.bert import CircleBertGenerationLayer
 from .build import DECODER_REGISTRY
 
 __all__ = ["TransformerDecoder"]
@@ -32,7 +32,7 @@ class TransformerDecoder(Decoder):
     @classmethod
     def from_config(cls, cfg):
         bert_generation_layers = nn.ModuleList(
-            [BertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
+            [CircleBertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
         )
         return {
             "num_generation_layers": cfg.MODEL.BERT.NUM_GENERATION_LAYERS,

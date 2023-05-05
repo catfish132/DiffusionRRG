@@ -16,5 +16,5 @@ from .attribute_decoder import AttributeDecoder
 from .cosnet_decoder import COSNetDecoder
 
 from .diffusion_transformer_decoder import DiffusionTransformerDecoder
-
+from .circle_diffusion_transformer_decoder import CircleDiffusionTransformerDecoder
 __all__ = list(globals().keys())

@@ -22,7 +22,7 @@ Original copyright of Hugging Face team code below, modifications by Yehao Li, C
 
 # tests directory-specific settings - this file is run automatically
 # by pytest before any tests are run
-
+import copy
 import math
 import torch
 from torch import nn
@@ -30,14 +30,15 @@ from torch import nn
 from xmodaler.config import configurable
 from ..layers.create_act import get_activation
 
+
 class BertSelfAttention(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *,
-        hidden_size,
-        num_attention_heads,
-        attention_probs_dropout_prob
+            self,
+            *,
+            hidden_size,
+            num_attention_heads,
+            attention_probs_dropout_prob
     ):
         super(BertSelfAttention, self).__init__()
         if hidden_size % num_attention_heads != 0:
@@ -74,12 +75,12 @@ class BertSelfAttention(nn.Module):
         shape_list = list(range(len(new_x_shape)))
         shape_list[-2], shape_list[-3] = shape_list[-3], shape_list[-2]
         return x.permute(shape_list)
-        #return x.permute(0, 2, 1, 3)
+        # return x.permute(0, 2, 1, 3)
 
     def forward(self, hidden_states, attention_mask, history_states=None):
         mixed_query_layer = self.query(hidden_states)
-        
-        if history_states is not None:            
+
+        if history_states is not None:
             mixed_key_layer = self.key(history_states)
             mixed_value_layer = self.value(history_states)
         else:
@@ -109,21 +110,22 @@ class BertSelfAttention(nn.Module):
         shape_list = list(range(len(context_layer.shape)))
         shape_list[-2], shape_list[-3] = shape_list[-3], shape_list[-2]
         context_layer = context_layer.permute(shape_list).contiguous()
-        #context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
+        # context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
 
         new_context_layer_shape = context_layer.size()[:-2] + (self.all_head_size,)
         context_layer = context_layer.view(*new_context_layer_shape)
-        
+
         return context_layer, attention_probs
+
 
 class BertSelfOutput(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *,
-        hidden_size: int,
-        layer_norm_eps: float,
-        hidden_dropout_prob: float
+            self,
+            *,
+            hidden_size: int,
+            layer_norm_eps: float,
+            hidden_dropout_prob: float
     ):
         super(BertSelfOutput, self).__init__()
         self.dense = nn.Linear(hidden_size, hidden_size)
@@ -144,13 +146,14 @@ class BertSelfOutput(nn.Module):
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
+
 class BertAttention(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *,
-        bert_self_attention,
-        bert_self_output
+            self,
+            *,
+            bert_self_attention,
+            bert_self_output
     ):
         super(BertAttention, self).__init__()
         self.self = bert_self_attention
@@ -168,15 +171,16 @@ class BertAttention(nn.Module):
         attention_output = self.output(self_output, input_tensor)
         return attention_output, attention_probs
 
+
 class BertIntermediate(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *,
-        hidden_size: int,
-        hidden_act: str,
-        intermediate_size: int,
-        intermediate_drop: float
+            self,
+            *,
+            hidden_size: int,
+            hidden_act: str,
+            intermediate_size: int,
+            intermediate_drop: float
     ):
         super(BertIntermediate, self).__init__()
         self.dense = nn.Linear(hidden_size, intermediate_size)
@@ -198,15 +202,16 @@ class BertIntermediate(nn.Module):
         hidden_states = self.dropout(hidden_states)
         return hidden_states
 
+
 class BertOutput(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *,
-        hidden_size: int,
-        intermediate_size: int,
-        layer_norm_eps: float,
-        ffn_dropout_prob: float
+            self,
+            *,
+            hidden_size: int,
+            intermediate_size: int,
+            layer_norm_eps: float,
+            ffn_dropout_prob: float
     ):
         super(BertOutput, self).__init__()
         self.dense = nn.Linear(intermediate_size, hidden_size)
@@ -228,14 +233,15 @@ class BertOutput(nn.Module):
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
+
 class BertXAttention(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *,
-        hidden_size,
-        num_attention_heads,
-        attention_probs_dropout_prob
+            self,
+            *,
+            hidden_size,
+            num_attention_heads,
+            attention_probs_dropout_prob
     ):
         super(BertXAttention, self).__init__()
         if hidden_size % num_attention_heads != 0:
@@ -267,7 +273,7 @@ class BertXAttention(nn.Module):
             self.attention_head_size,
         )
         x = x.view(*new_x_shape)
-        #return x.permute(0, 2, 1, 3)
+        # return x.permute(0, 2, 1, 3)
         shape_list = list(range(len(new_x_shape)))
         shape_list[-2], shape_list[-3] = shape_list[-3], shape_list[-2]
         return x.permute(shape_list)
@@ -300,19 +306,20 @@ class BertXAttention(nn.Module):
         shape_list[-2], shape_list[-3] = shape_list[-3], shape_list[-2]
         context_layer = context_layer.permute(shape_list).contiguous()
 
-        #context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
+        # context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
         new_context_layer_shape = context_layer.size()[:-2] + (self.all_head_size,)
         context_layer = context_layer.view(*new_context_layer_shape)
 
         return context_layer, attention_probs
 
+
 class BertCrossAttention(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *,
-        bert_cross_attention,
-        bert_self_output
+            self,
+            *,
+            bert_cross_attention,
+            bert_self_output
     ):
         super(BertCrossAttention, self).__init__()
         self.self = bert_cross_attention
@@ -323,7 +330,7 @@ class BertCrossAttention(nn.Module):
         return {
             "bert_cross_attention": BertXAttention(cfg),
             "bert_self_output": BertSelfOutput(cfg),
-        } 
+        }
 
     def forward(self, query, key, value, attention_mask, q_attention_mask):
         x_output, attention_probs = self.self(query, key, value, attention_mask)
@@ -334,11 +341,11 @@ class BertCrossAttention(nn.Module):
 class BertLayer(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *,
-        bert_attention, 
-        bert_intermediate,
-        bert_output
+            self,
+            *,
+            bert_attention,
+            bert_intermediate,
+            bert_output
     ):
         super(BertLayer, self).__init__()
         self.attention = bert_attention
@@ -359,16 +366,17 @@ class BertLayer(nn.Module):
         layer_output = self.output(intermediate_output, attention_output)
         return layer_output, attention_probs
 
+
 class BertUnderstandingLayer(nn.Module):
     @configurable
     def __init__(
-        self,
-        *,
-        bert_attention,
-        v_bert_intermediate,
-        v_bert_output,
-        t_bert_intermediate,
-        t_bert_output,
+            self,
+            *,
+            bert_attention,
+            v_bert_intermediate,
+            v_bert_output,
+            t_bert_intermediate,
+            t_bert_output,
     ):
         super(BertUnderstandingLayer, self).__init__()
         self.biattention = bert_attention
@@ -404,17 +412,18 @@ class BertUnderstandingLayer(nn.Module):
 
         return v_feats, t_feats
 
+
 class BertGenerationLayer(nn.Module):
     @configurable
     def __init__(
-        self,
-        *,
-        bert_attention,
-        bert_cross_attention,
-        bert_intermediate,
-        bert_output
+            self,
+            *,
+            bert_attention,
+            bert_cross_attention,
+            bert_intermediate,
+            bert_output
     ):
-        super(BertGenerationLayer, self).__init__()
+        super(CircleBertGenerationLayer, self).__init__()
         self.self_attn = bert_attention
         self.x_att = bert_cross_attention
         self.intermediate = bert_intermediate
@@ -437,12 +446,49 @@ class BertGenerationLayer(nn.Module):
 
         return layer_output
 
+
+class CircleBertGenerationLayer(nn.Module):
+    @configurable
+    def __init__(
+            self,
+            *,
+            bert_attention,
+            bert_cross_attention,
+            bert_intermediate,
+            bert_output
+    ):
+        super(CircleBertGenerationLayer, self).__init__()
+        self.text_self_attn = bert_attention
+        self.text_x_att = bert_cross_attention
+        self.img_x_att = copy.deepcopy(bert_cross_attention)
+        self.intermediate = bert_intermediate
+        self.output = bert_output
+
+    @classmethod
+    def from_config(cls, cfg):
+        return {
+            "bert_attention": BertAttention(cfg),
+            "bert_cross_attention": BertCrossAttention(cfg),
+            "bert_intermediate": BertIntermediate(cfg),
+            "bert_output": BertOutput(cfg)
+        }
+
+    def forward(self, lang_feats, v_feats, lang_attention_mask=None, v_attention_mask=None, t_history_states=None):
+        x, _ = self.text_self_attn(lang_feats, lang_attention_mask, t_history_states)
+        x, _ = self.text_x_att(x, v_feats, v_feats, v_attention_mask, lang_attention_mask)
+        intermediate_output = self.intermediate(x)
+        text_output = self.output(intermediate_output, x)
+        image_output, _ = self.img_x_att(v_feats, lang_feats, lang_feats, None, None)
+
+        return text_output, image_output
+
+
 class BertPooler(nn.Module):
     @configurable
     def __init__(
-        self, 
-        *, 
-        hidden_size: int
+            self,
+            *,
+            hidden_size: int
     ):
         super(BertPooler, self).__init__()
         self.dense = nn.Linear(hidden_size, hidden_size)
@@ -460,14 +506,15 @@ class BertPooler(nn.Module):
         pooled_output = self.activation(pooled_output)
         return pooled_output
 
+
 class BertPredictionHeadTransform(nn.Module):
     @configurable
     def __init__(
-        self,
-        *,
-        hidden_size: int,
-        hidden_act: str,
-        layer_norm_eps: float
+            self,
+            *,
+            hidden_size: int,
+            hidden_act: str,
+            layer_norm_eps: float
     ):
         super(BertPredictionHeadTransform, self).__init__()
         self.dense = nn.Linear(hidden_size, hidden_size)
@@ -487,6 +534,3 @@ class BertPredictionHeadTransform(nn.Module):
         hidden_states = self.transform_act_fn(hidden_states)
         hidden_states = self.LayerNorm(hidden_states)
         return hidden_states
-
-
-
