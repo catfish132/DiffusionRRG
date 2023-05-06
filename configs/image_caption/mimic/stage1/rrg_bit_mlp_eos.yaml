@@ -3,11 +3,11 @@ DATASETS:
   TRAIN: 'RRGDiffusionDataset'
   VAL: ''
   TEST: 'RRGDiffusionDataset'
-
-OUTPUT_DIR: './rrg_output/stage1/mimic_ce_eos'
+OUTPUT_DIR: 'rrg_output/stage1/xe_mlp_eos'
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 128
+  TRAIN_BATCH_SIZE: 64
+  TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
   SEQ_PER_SAMPLE: 3
@@ -30,7 +30,8 @@ MODEL:
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 100
   USE_EMA: True
-  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_ce_eos/model_Epoch_00014_Iter_0029609.pth"
+  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_ce_eos/model_Epoch_00013_Iter_0027494.pth"
+
 
   #################################### Token embedding ####################################
   TOKEN_EMBED:
@@ -94,8 +95,8 @@ LR_SCHEDULER:
 
 ####################################### losses ####################################### 
 LOSSES:
-  NAMES: [ 'MSELoss', "EosCrossEntropy" ]
-#  EOS_WEIGHT: 1.0
+  NAMES: [ 'MSELoss', "LabelSmoothing", "MlpEosLoss" ]
+  LABELSMOOTHING: 0.1
 
 ####################################### scorer ####################################### 
 SCORER:

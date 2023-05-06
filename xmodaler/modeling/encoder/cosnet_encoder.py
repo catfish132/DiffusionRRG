@@ -10,7 +10,7 @@ from torch import nn
 from xmodaler.config import configurable
 from xmodaler.config import CfgNode as CN
 from xmodaler.config import kfg
-from ..layers.bert import BertLayer, CircleBertGenerationLayer
+from ..layers.bert import BertLayer, BertGenerationLayer
 from .build import ENCODER_REGISTRY
 
 __all__ = ["COSNetEncoder"]
@@ -74,7 +74,7 @@ class COSNetEncoder(nn.Module):
             [BertLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_HIDDEN_LAYERS)]
         )
         semcomphder_layers = nn.ModuleList(
-            [CircleBertGenerationLayer(cfg) for _ in range(cfg.MODEL.COSNET.NUM_SEMCOMPHDER_LAYERS)]
+            [BertGenerationLayer(cfg) for _ in range(cfg.MODEL.COSNET.NUM_SEMCOMPHDER_LAYERS)]
         )
         return {
             "bert_layers": bert_layers,

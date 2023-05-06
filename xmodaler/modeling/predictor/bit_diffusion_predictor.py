@@ -17,16 +17,17 @@ from .build import PREDICTOR_REGISTRY
 
 __all__ = ["BitDiffusionPredictor"]
 
+
 @PREDICTOR_REGISTRY.register()
 class BitDiffusionPredictor(BasePredictor):
     @configurable
     def __init__(
-        self,
-        *,
-        hidden_size: int,
-        vocab_size: int,   # include <BOS>/<EOS>
-        dropout: float,
-        vocab_bit_buffer: torch.tensor
+            self,
+            *,
+            hidden_size: int,
+            vocab_size: int,  # include <BOS>/<EOS>
+            dropout: float,
+            vocab_bit_buffer: torch.tensor
     ):
         super(BitDiffusionPredictor, self).__init__(
             hidden_size=hidden_size,
@@ -34,6 +35,7 @@ class BitDiffusionPredictor(BasePredictor):
             dropout=dropout
         )
         self.register_buffer('vocab_bit_buffer', vocab_bit_buffer, persistent=False)
+        self.eos_mlp = nn.Linear(hidden_size, 1)
 
     @classmethod
     def from_config(cls, cfg):
@@ -59,15 +61,16 @@ class BitDiffusionPredictor(BasePredictor):
         hidden_states = batched_inputs[kfg.U_HIDDEN_STATES]
         if isinstance(hidden_states, list):
             hidden_states = hidden_states[-1]
-        if self.dropout:  
+        if self.dropout:
             hidden_states = self.dropout(hidden_states)
         logits = self.logits(hidden_states)
 
         batch_size = logits.shape[0]
         buffer_probs = nn.Softmax(dim=-1)(logits)
         logits_w = torch.matmul(buffer_probs, self.vocab_bit_buffer.expand(batch_size, -1, -1))
-
-        return { 
+        eos_logit = self.eos_mlp(hidden_states).squeeze()
+        return {
             kfg.U_LOGITS: logits_w,
-            kfg.G_LOGITS: logits
+            kfg.G_LOGITS: logits,
+            'eos_logit': eos_logit
         }

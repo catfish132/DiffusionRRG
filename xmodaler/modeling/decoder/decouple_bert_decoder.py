@@ -11,7 +11,7 @@ from xmodaler.config import configurable
 from xmodaler.config import CfgNode as CN
 from xmodaler.config import kfg
 from .decoder import Decoder
-from ..layers.bert import BertUnderstandingLayer, CircleBertGenerationLayer
+from ..layers.bert import BertUnderstandingLayer, BertGenerationLayer
 from .build import DECODER_REGISTRY
 
 __all__ = ["DecoupleBertDecoder"]
@@ -45,7 +45,7 @@ class DecoupleBertDecoder(Decoder):
             [BertUnderstandingLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_UNDERSTANDING_LAYERS)]
         )
         bert_generation_layers = nn.ModuleList(
-            [CircleBertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
+            [BertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
         )
         return {
             "num_understanding_layers": cfg.MODEL.BERT.NUM_UNDERSTANDING_LAYERS,

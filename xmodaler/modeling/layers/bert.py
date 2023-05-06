@@ -423,7 +423,7 @@ class BertGenerationLayer(nn.Module):
             bert_intermediate,
             bert_output
     ):
-        super(CircleBertGenerationLayer, self).__init__()
+        super(BertGenerationLayer, self).__init__()
         self.self_attn = bert_attention
         self.x_att = bert_cross_attention
         self.intermediate = bert_intermediate
