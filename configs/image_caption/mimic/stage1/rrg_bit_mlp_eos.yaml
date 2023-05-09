@@ -3,7 +3,7 @@ DATASETS:
   TRAIN: 'RRGDiffusionDataset'
   VAL: ''
   TEST: 'RRGDiffusionDataset'
-OUTPUT_DIR: 'rrg_output/stage1/xe_mlp_eos'
+OUTPUT_DIR: 'rrg_output/stage1/xe_mlp_eos_t50'
 ###################################### DATALOADER ######################################
 DATALOADER:
   TRAIN_BATCH_SIZE: 64
@@ -28,9 +28,9 @@ MODEL:
   DECODER_DIM: 512
   PREDICTOR: 'BitDiffusionPredictor'
   PRED_DROPOUT: 0.1
-  MAX_SEQ_LEN: 100
+  MAX_SEQ_LEN: 80
   USE_EMA: True
-  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_ce_eos/model_Epoch_00013_Iter_0027494.pth"
+#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/xe_mlp_eos/model_Epoch_00042_Iter_0177701.pth"
 
 
   #################################### Token embedding ####################################
@@ -111,7 +111,7 @@ SCORER:
 DECODE_STRATEGY:
   NAME: 'RRGDiffusionSampler'
   DIFFUSION:
-    TIMESTEPS: 100
+    TIMESTEPS: 50
     TIME_DIFFERENCE: 0.0
     SAMPLE_NOISE: False
 

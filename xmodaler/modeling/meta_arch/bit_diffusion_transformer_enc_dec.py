@@ -129,7 +129,7 @@ class BitDiffusionTransformerEncoderDecoder(TransformerEncoderDecoder):
         device = inputs[kfg.ATT_FEATS].device
 
         # sample random times
-        times = torch.zeros((batch_size,), device=device).float().uniform_(0, 0.999)
+        times = torch.zeros((batch_size,), device=device).float().uniform_(0, 0.999)# 从0到0.99取随机数
 
         bit_token_embed = inputs[kfg.U_TOKENS_IDS_BIT]
         noise = torch.randn_like(bit_token_embed)

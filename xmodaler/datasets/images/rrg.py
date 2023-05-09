@@ -96,11 +96,12 @@ class RRGDiffusionDataset:
             image = self.transform(image)
             images.append(image)
 
-        if self.staged != 'train':  # 如果是推理模式就不需要提供token了，计算指标可能在后续会进行
+        if self.stage != 'train':  # 如果是推理模式就不需要提供token了，计算指标可能在后续会进行
             u_tokens_ids = np.array(dataset_dict['report'], dtype=np.int64)
             u_tokens_type = np.zeros(self.max_seq_len, dtype=np.int64)
         else:
-            u_tokens_ids = np.array(dataset_dict['report'], dtype=np.int64)
+            u_tokens_ids = np.array(dataset_dict['report'], dtype=np.int64)[:self.max_seq_len]
+            u_tokens_ids[-1] = 0
             u_tokens_type = np.zeros((len(u_tokens_ids)), dtype=np.int64)
         # 查找相似报告的特征
         similar = [self.similar_file[similar_id] for similar_id in dataset_dict['similar']]

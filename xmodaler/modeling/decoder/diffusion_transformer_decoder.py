@@ -14,14 +14,15 @@ from .build import DECODER_REGISTRY
 
 __all__ = ["DiffusionTransformerDecoder"]
 
+
 @DECODER_REGISTRY.register()
 class DiffusionTransformerDecoder(TransformerDecoder):
     @configurable
     def __init__(
-        self,
-        *,
-        num_generation_layers: int,
-        bert_generation_layers
+            self,
+            *,
+            num_generation_layers: int,
+            bert_generation_layers
     ):
         super(DiffusionTransformerDecoder, self).__init__(
             num_generation_layers=num_generation_layers,
@@ -38,8 +39,9 @@ class DiffusionTransformerDecoder(TransformerDecoder):
         ext_u_tmasks = batched_inputs[kfg.EXT_U_TOKENS_MASKS]
 
         for i, layer_module in enumerate(self.g_layers):
-            u_tfeats = layer_module(u_tfeats, vfeats, ext_u_tmasks, ext_vmasks, t_history_states=None)
+            u_tfeats = layer_module(u_tfeats, vfeats, None, None,
+                                    t_history_states=None)  # ext_u_tmasks=None, ext_vmasks=None
             u_tfeats_arr.append(u_tfeats)
-        ret.update({ kfg.U_HIDDEN_STATES: u_tfeats_arr })
+        ret.update({kfg.U_HIDDEN_STATES: u_tfeats_arr})
 
         return ret

@@ -13,14 +13,15 @@ from .build import LOSSES_REGISTRY
 @LOSSES_REGISTRY.register()
 class MlpEosLoss(nn.Module):
     @configurable
-    def __init__(self):
+    def __init__(self, seq_len):
         super(MlpEosLoss, self).__init__()
         self.eos_criterion = nn.BCEWithLogitsLoss()
+        self.seq_len = seq_len
 
     @classmethod
     def from_config(cls, cfg):
         return {
-
+            'seq_len': cfg.MODEL.MAX_SEQ_LEN
         }
 
     @classmethod
@@ -31,7 +32,8 @@ class MlpEosLoss(nn.Module):
         ret = {}
         if kfg.G_LOGITS in outputs_dict:
             eos_logit = outputs_dict['eos_logit']
-            targets = outputs_dict[kfg.U_TOKENS_IDS]
+            targets = outputs_dict[kfg.U_TOKENS_IDS]#[:, :self.seq_len]
+            # targets[:, self.seq_len-1] = 0  #  最后一个GT token，必须是EOS
             eos_targets = torch.zeros_like(targets).float()
             eos_targets[targets == 0] = 1.  # 即EOS为1其他都为0
 
