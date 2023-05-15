@@ -11,27 +11,29 @@ from xmodaler.config import CfgNode as CN
 from xmodaler.config import kfg
 from .transformer_decoder import TransformerDecoder
 from .build import DECODER_REGISTRY
-from ..layers.bert import CircleBertGenerationLayer
+from ..layers.bert import TcnBertGenerationLayer
 
-__all__ = ["CircleDiffusionTransformerDecoder"]
+__all__ = ["TcnDiffusionTransformerDecoder"]
+
 
 @DECODER_REGISTRY.register()
-class CircleDiffusionTransformerDecoder(TransformerDecoder):
+class TcnDiffusionTransformerDecoder(TransformerDecoder):
     @configurable
     def __init__(
-        self,
-        *,
-        num_generation_layers: int,
-        bert_generation_layers
+            self,
+            *,
+            num_generation_layers: int,
+            bert_generation_layers
     ):
-        super(CircleDiffusionTransformerDecoder, self).__init__(
+        super(TcnDiffusionTransformerDecoder, self).__init__(
             num_generation_layers=num_generation_layers,
             bert_generation_layers=bert_generation_layers
         )
+
     @classmethod
     def from_config(cls, cfg):
         bert_generation_layers = nn.ModuleList(
-            [BertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
+            [TcnBertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
         )
         return {
             "num_generation_layers": cfg.MODEL.BERT.NUM_GENERATION_LAYERS,
@@ -48,8 +50,8 @@ class CircleDiffusionTransformerDecoder(TransformerDecoder):
         ext_u_tmasks = batched_inputs[kfg.EXT_U_TOKENS_MASKS]
 
         for i, layer_module in enumerate(self.g_layers):
-            u_tfeats,vfeats = layer_module(u_tfeats, vfeats, ext_u_tmasks, ext_vmasks, t_history_states=None)
+            u_tfeats = layer_module(u_tfeats, vfeats, ext_u_tmasks, ext_vmasks, t_history_states=None)
             u_tfeats_arr.append(u_tfeats)
-        ret.update({ kfg.U_HIDDEN_STATES: u_tfeats_arr })
+        ret.update({kfg.U_HIDDEN_STATES: u_tfeats_arr})
 
         return ret

@@ -4,9 +4,10 @@ DATASETS:
   VAL: ''
   TEST: 'RRGDiffusionDataset'
 
+OUTPUT_DIR: './rrg_output/stage1/mimic_tcn'
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 2
+  TRAIN_BATCH_SIZE: 32
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
@@ -24,18 +25,18 @@ MODEL:
   META_ARCHITECTURE: 'RrgBitDiffusion'
   ENCODER: 'TransformerEncoder'
   ENCODER_DIM: 512
-  DECODER: 'DiffusionTransformerDecoder'
+  DECODER: 'TcnDiffusionTransformerDecoder'
   DECODER_DIM: 512
   PREDICTOR: 'BitDiffusionPredictor'
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 100
-  USE_EMA: True
-  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_ce_eos/model_Epoch_00013_Iter_0027494.pth"
+  USE_EMA: False
+#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_ce_eos/model_Epoch_00013_Iter_0027494.pth"
 
   #################################### TCN ################################################
   TCN:
     NUM_CHANNELS: [512, 512, 512, 512]
-    KERNEL_SIZE: 2
+    KERNEL_SIZE: 3
     DROPOUT: 0.2
   #################################### Token embedding ####################################
   TOKEN_EMBED:
