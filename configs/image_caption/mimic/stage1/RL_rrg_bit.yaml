@@ -49,4 +49,4 @@ SCORER:
 #  CIDER_CACHED: '/home/jinyuda/dataset/xmodaler/mscoco/mscoco_train_cider.pkl'
   EOS_ID: 0
 
-c
+

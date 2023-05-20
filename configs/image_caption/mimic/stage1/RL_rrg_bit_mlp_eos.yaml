@@ -3,21 +3,20 @@ DATASETS:
   TRAIN: 'RRGDiffusionDataset'
   VAL: ''
   TEST: 'RRGDiffusionDataset'
-
-OUTPUT_DIR: './rrg_output/stage1/mimic_tcn'
+OUTPUT_DIR: 'rrg_output/stage1/xe_mlp_eos_rl'
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 64
+  TRAIN_BATCH_SIZE: 32
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
-  SEQ_PER_SAMPLE: 3
+  SEQ_PER_SAMPLE: 1
   IMAGE_PATH: '/home/jinyuda/dataset/medic/mimic_cxr/images/'
   SIMILAR_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mim_whole_bert.npy"
 
 ######################################### Engine #########################################
 ENGINE:
-  NAME: 'BitDiffusionTrainer'
+  NAME: 'RLDiffusionTrainer'
 
 ######################################### MODEL #########################################
 MODEL:
@@ -25,19 +24,15 @@ MODEL:
   META_ARCHITECTURE: 'RrgBitDiffusion'
   ENCODER: 'TransformerEncoder'
   ENCODER_DIM: 512
-  DECODER: 'TcnDiffusionTransformerDecoder'
+  DECODER: 'DiffusionTransformerDecoder'
   DECODER_DIM: 512
   PREDICTOR: 'BitDiffusionPredictor'
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 100
-  USE_EMA: False
-#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_tcn/model_Epoch_00018_Iter_0152315.pth"
+  USE_EMA: True
+  WEIGHTS: "/home/jinyuda/change_rrg_diffusion/change_mimic_9_bit_mlp_eos_rl.pth"
 
-  #################################### TCN ################################################
-  TCN:
-    NUM_CHANNELS: [512, 512, 512, 512]
-    KERNEL_SIZE: 3
-    DROPOUT: 0.2
+
   #################################### Token embedding ####################################
   TOKEN_EMBED:
     NAME: 'BitEmbedding'
@@ -76,7 +71,7 @@ SOLVER:
   EPOCH: 60
   CHECKPOINT_PERIOD: 1
   EVAL_PERIOD: 1
-  BASE_LR: 0.0005  # 0.0005
+  BASE_LR: 0.00001  # 0.00001
   BIAS_LR_FACTOR: 1.0
   WEIGHT_DECAY: 0.0
   WEIGHT_DECAY_NORM: 0.0
@@ -100,23 +95,23 @@ LR_SCHEDULER:
 
 ####################################### losses ####################################### 
 LOSSES:
-  NAMES: [ 'MSELoss', "LabelSmoothing" ]
+  NAMES: [ 'MSELoss', "LabelSmoothing", "MlpEosLoss" ]
   LABELSMOOTHING: 0.1
 
 ####################################### scorer ####################################### 
 SCORER:
-  NAME: 'BaseScorer'
-  TYPES: [ 'Cider' ]
+  NAME: 'Bleu4Scorer'
+  TYPES: [ 'Bleu-4' ]
   WEIGHTS: [ 1.0 ]
-  GT_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
-  CIDER_CACHED: '/home/jinyuda/dataset/xmodaler/mscoco/mscoco_train_cider.pkl'
+  GT_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gtid.pkl"
+#  CIDER_CACHED: '/home/jinyuda/dataset/xmodaler/mscoco/mscoco_train_cider.pkl'
   EOS_ID: 0
 
 ####################################### decode strategy ####################################### 
 DECODE_STRATEGY:
   NAME: 'RRGDiffusionSampler'
   DIFFUSION:
-    TIMESTEPS: 200
+    TIMESTEPS: 100
     TIME_DIFFERENCE: 0.0
     SAMPLE_NOISE: False
 
