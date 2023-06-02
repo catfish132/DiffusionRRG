@@ -3,14 +3,14 @@ DATASETS:
   TRAIN: 'RRGDiffusionDataset'
   VAL: ''
   TEST: 'RRGDiffusionDataset'
-OUTPUT_DIR: 'rrg_output/stage1/xe_mlp_eos'
+OUTPUT_DIR: 'rrg_output/stage1/bit_memory'
 ###################################### DATALOADER ######################################
 DATALOADER:
   TRAIN_BATCH_SIZE: 64
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
-  SEQ_PER_SAMPLE: 1
+  SEQ_PER_SAMPLE: 3
   IMAGE_PATH: '/home/jinyuda/dataset/medic/mimic_cxr/images/'
   SIMILAR_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mim_whole_bert.npy"
 
@@ -24,15 +24,19 @@ MODEL:
   META_ARCHITECTURE: 'RrgBitDiffusion'
   ENCODER: 'TransformerEncoder'
   ENCODER_DIM: 512
-  DECODER: 'DiffusionTransformerDecoder'
+  DECODER: 'MemoryDiffusionTransformerDecoder'
   DECODER_DIM: 512
   PREDICTOR: 'BitDiffusionPredictor'
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 100
   USE_EMA: True
-#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/xe_mlp_eos/model_Epoch_00042_Iter_0177701.pth"
+#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_ce_eos/model_Epoch_00013_Iter_0027494.pth"
 
-
+  #################################### TCN ################################################
+  TCN:
+    NUM_CHANNELS: [512, 512, 512, 512]
+    KERNEL_SIZE: 2
+    DROPOUT: 0.2
   #################################### Token embedding ####################################
   TOKEN_EMBED:
     NAME: 'BitEmbedding'
@@ -95,9 +99,8 @@ LR_SCHEDULER:
 
 ####################################### losses ####################################### 
 LOSSES:
-  NAMES: [ 'MSELoss', "LabelSmoothing", "MlpEosLoss" ]
+  NAMES: [ 'MSELoss', "LabelSmoothing" ]
   LABELSMOOTHING: 0.1
-  CLS_LOSS_WEIGHT: 10.0
 
 ####################################### scorer ####################################### 
 SCORER:

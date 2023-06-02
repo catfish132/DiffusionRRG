@@ -32,6 +32,7 @@ class RRGDiffusionDataset:
             max_seq_len: int,
             image_path: str,
             cas_rand_ratio,
+            dataset_name: str
     ):
         self.stage = stage
         self.anno_folder = anno_folder  # 我们直接使用anno_folder 指向标注文件
@@ -54,6 +55,7 @@ class RRGDiffusionDataset:
                 transforms.Normalize((0.485, 0.456, 0.406),
                                      (0.229, 0.224, 0.225))])
         self.similar_file = np.load(self.similar_path, allow_pickle=True).item()
+        self.dataset_name = dataset_name
 
     @classmethod
     def from_config(cls, cfg, stage: str = "train"):
@@ -63,6 +65,7 @@ class RRGDiffusionDataset:
                "max_seq_len": cfg.MODEL.MAX_SEQ_LEN,
                "image_path": cfg.DATALOADER.IMAGE_PATH,
                "cas_rand_ratio": cfg.DATALOADER.CASCADED_SENT_RAND_RATIO,
+               'dataset_name': cfg.DATASETS.NAME
                }
         return ret
 
@@ -104,14 +107,24 @@ class RRGDiffusionDataset:
             u_tokens_ids[-1] = 0
             u_tokens_type = np.zeros((len(u_tokens_ids)), dtype=np.int64)
         # 查找相似报告的特征
-        similar = [self.similar_file[similar_id] for similar_id in dataset_dict['similar']]
-        ret = {
-            kfg.IDS: id,
-            kfg.U_TOKENS_IDS: u_tokens_ids,
-            kfg.U_TOKENS_TYPE: u_tokens_type,
-            kfg.IMAGES: images,
-            kfg.SIMILAR: similar
-        }
+        if self.dataset_name == 'MIMIC_CXR':
+            similar = [self.similar_file[similar_id] for similar_id in dataset_dict['similar']]
+            ret = {
+                kfg.IDS: id,
+                kfg.U_TOKENS_IDS: u_tokens_ids,
+                kfg.U_TOKENS_TYPE: u_tokens_type,
+                kfg.IMAGES: images,
+                kfg.SIMILAR: similar
+            }
+        else:
+            ret = {
+                kfg.IDS: id,
+                kfg.U_TOKENS_IDS: u_tokens_ids,
+                kfg.U_TOKENS_TYPE: u_tokens_type,
+                kfg.IMAGES: images,
+                # kfg.SIMILAR: similar
+            }
+
         if 'cascaded_tokens_ids' in dataset_dict:
             cascaded_tokens_ids = dataset_dict['cascaded_tokens_ids']
             if cascaded_tokens_ids.shape[0] == 1:
