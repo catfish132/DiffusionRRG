@@ -114,7 +114,7 @@ class RRGDiffusionDataset:
                 kfg.U_TOKENS_IDS: u_tokens_ids,
                 kfg.U_TOKENS_TYPE: u_tokens_type,
                 kfg.IMAGES: images,
-                kfg.SIMILAR: similar
+                # kfg.SIMILAR: similar
             }
         else:
             ret = {

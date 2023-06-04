@@ -23,3 +23,4 @@ from .build import build_engine
 from .bit_diffusion_trainer import BitDiffusionTrainer
 from .rl_diffusion_trainer import RLDiffusionTrainer
 from .bit_diffusion_cascader import BitDiffusionCascader
+from .bit_diffusion_gan_trainer import BitDiffusionGanTrainer
