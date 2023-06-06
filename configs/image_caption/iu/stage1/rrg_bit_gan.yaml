@@ -12,7 +12,7 @@ DATALOADER:
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/iu_xray/pkl/iu_gts.pkl"
-  SEQ_PER_SAMPLE: 3
+  SEQ_PER_SAMPLE: 1
   IMAGE_PATH: "/home/jinyuda/dataset/medic/iu_xray/images/"
   SIMILAR_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mim_whole_bert.npy"
 

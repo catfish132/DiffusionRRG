@@ -14,6 +14,8 @@ def decode_sequence(vocab, seq):
             ix = seq[n, t]
             if ix == 0:
                 break
+            if ix > len(vocab):
+                print(ix)
             words.append(vocab[ix])
         sent = ' '.join(words)
         sents.append(sent)

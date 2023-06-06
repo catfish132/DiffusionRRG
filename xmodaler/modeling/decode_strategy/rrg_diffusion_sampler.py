@@ -114,7 +114,8 @@ class RRGDiffusionSampler(DecodeStrategy):
             inputs.update({kfg.C_TOKENS_IDS_BIT: cascaded_ids_bit})
 
         outputs, _ = self.ddpm_sample(model, (batch_size, self.max_seq_len, self.bit_dim), inputs)
-        outputs = outputs.clamp(0., 4335.).long()
+        vacub_size = 760. if self.max_seq_len<=60 else 4335.
+        outputs = outputs.clamp(0., vacub_size).long()
 
         return {
             kfg.IDS: batched_inputs[kfg.IDS],

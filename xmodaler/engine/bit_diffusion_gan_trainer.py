@@ -30,6 +30,8 @@ class BitDiffusionGanTrainer(DefaultTrainer):
         self.D = self.D.cuda()
         self.D_optimizer = self.build_optimizer(cfg, self.D)
         self.D_loss = torch.nn.BCELoss()
+        self.D_bp_period = 2
+        self.D_cur_period = 0
 
     def run_step(self):
         assert self.model.training, "[SimpleTrainer] model was changed to eval mode!"
@@ -51,35 +53,39 @@ class BitDiffusionGanTrainer(DefaultTrainer):
             origin_targets = data[kfg.U_TOKENS_IDS]
             origin_targets_str = self.model.beam_searcher.output_sents(origin_targets.view(-1, 20))
 
-        ########################## 更新判别器
-        for p in self.D.parameters():
-            p.requires_grad = True
         batch_size = data['U_TOKENS_IDS'].size(0)
         real_label = Variable(torch.ones(batch_size)).cuda()
         fake_label = Variable(torch.zeros(batch_size)).cuda()
-
-        # compute loss of fake_img
         outputs_dict = self.model(data)
-        fake_report = outputs_dict['U_LOGITS']  # 噪声输入G中获得假冒的报告
-        fake_report = fake_report.clone().detach()  # 将fake report变成叶子节点，这样就避免了更新生成模型
-        D_fake_logit = self.D(fake_report).squeeze()  # D　判断假冒照片的值 #
-        D_loss_fake = self.D_loss(D_fake_logit, fake_label)  # 计算 假冒照片判别结果与0的损失，这样判别器就能使得真实图片的得分尽量高，假冒图片的得分尽量低
+        if self.D_cur_period == self.D_bp_period:
+            ########################## 更新判别器
+            for p in self.D.parameters():
+                p.requires_grad = True
+            # compute loss of fake_img
+            fake_report = outputs_dict['U_LOGITS']  # 噪声输入G中获得假冒的报告
+            fake_report = fake_report.clone().detach()  # 将fake report变成叶子节点，这样就避免了更新生成模型
+            D_fake_logit = self.D(fake_report).squeeze()  # D　判断假冒报告的值 #
+            D_loss_fake = self.D_loss(D_fake_logit, fake_label)  # 计算 假冒报告判别结果与0的损失，这样判别器就能使得真实图片的得分尽量高，假冒图片的得分尽量低
 
-        # compute loss of real_img
-        real_reports = data['U_TARGET_IDS']
-        real_noise = torch.normal(0.,0.05,size=real_reports.size()).cuda()
-        real_reports = torch.clamp(real_reports+real_noise, -1., 1.)
-        D_real_logit = self.D(real_reports).squeeze() # closer to 1 means better 。 真值输入D的结果与真实标签1对比，如果D输出的真值结果与1越接近，说明D可以识别真实值
-        D_loss_real = self.D_loss(D_real_logit, real_label)
+            # compute loss of real_img
+            real_reports = data['U_TARGET_IDS']
+            real_reports = real_reports.clone().detach()
+            real_noise = torch.normal(0., 0.05, size=real_reports.size()).cuda()
+            real_reports = torch.clamp(real_reports + real_noise, -1., 1.)
+            D_real_logit = self.D(real_reports).squeeze()
+            # closer to 1 means better 。 真值输入D的结果与真实标签1对比，如果D输出的真值结果与1越接近，说明D可以识别真实值
+            D_loss_real = self.D_loss(D_real_logit, real_label)
 
-        # bp and optimize
-        D_loss = D_loss_real + D_loss_fake
-        self.D_optimizer.zero_grad()  # 训练D网络，分别设置优化器
-        D_loss.backward()   # 反向传递D 的梯度，再更新D
-        self.D_optimizer.step()
-        for p in self.D.parameters():  # 更新G时需要冻住D
-            p.requires_grad = False
-
+            # bp and optimize
+            D_loss = D_loss_real + D_loss_fake
+            self.D_optimizer.zero_grad()  # 训练D网络，分别设置优化器
+            D_loss.backward()  # 反向传递D 的梯度，再更新D
+            self.D_optimizer.step()
+            for p in self.D.parameters():  # 更新G时需要冻住D
+                p.requires_grad = False
+            self.D_cur_period = 0
+        else:
+            self.D_cur_period += 1
         ############################ 更新主模型
         fake_report = outputs_dict['U_LOGITS']  # fake_report 重新指向模型生成的报告，使得可以更新生成模型
         if self.debug:
@@ -97,7 +103,7 @@ class BitDiffusionGanTrainer(DefaultTrainer):
 
         D_fake_logit = self.D(fake_report).squeeze()
         g_loss = self.D_loss(D_fake_logit, real_label)  # G生成的假冒图片和1算loss 这样就能更新生成器了
-        losses_dict.update({'G_loss':g_loss*0.1})
+        losses_dict.update({'G_loss': g_loss})
 
         losses = [losses_dict[k] for k in losses_dict if 'acc' not in k]
         losses = sum(losses)
@@ -109,9 +115,10 @@ class BitDiffusionGanTrainer(DefaultTrainer):
         self.optimizer.zero_grad()
         losses.backward()
 
-        losses_dict.update({'D_loss': D_loss})
-        losses_dict.update({'D_loss_real': D_loss_real})
-        losses_dict.update({'D_loss_fake':D_loss_fake})
+        if self.D_cur_period == 0:
+            losses_dict.update({'D_loss': D_loss})
+            losses_dict.update({'D_loss_real': D_loss_real})
+            losses_dict.update({'D_loss_fake': D_loss_fake})
         self._write_metrics(losses_dict, data_time)
 
         self.optimizer.step()

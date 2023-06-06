@@ -108,7 +108,7 @@ class RRGDiffusionDataset:
             u_tokens_type = np.zeros((len(u_tokens_ids)), dtype=np.int64)
         # 查找相似报告的特征
         if self.dataset_name == 'MIMIC_CXR':
-            similar = [self.similar_file[similar_id] for similar_id in dataset_dict['similar']]
+            # similar = [self.similar_file[similar_id] for similar_id in dataset_dict['similar']]
             ret = {
                 kfg.IDS: id,
                 kfg.U_TOKENS_IDS: u_tokens_ids,
