@@ -3,7 +3,7 @@ DATASETS:
   TRAIN: 'RRGDiffusionDataset'
   VAL: ''
   TEST: 'RRGDiffusionDataset'
-OUTPUT_DIR: 'rrg_output/stage1/xe_mlp_eos'
+OUTPUT_DIR: 'rrg_output/stage1/mimic_meshed_mlp_eos'
 ###################################### DATALOADER ######################################
 DATALOADER:
   TRAIN_BATCH_SIZE: 16
@@ -22,20 +22,16 @@ ENGINE:
 MODEL:
   VOCAB_SIZE: 4336 # include <BOS>/<EOS>  4336 for mimic(with 4335words in vecabulary) 761 for iu(with 760words in vecabulary）
   META_ARCHITECTURE: 'RrgBitDiffusion'
-  ENCODER: 'TransformerEncoder'
+  ENCODER: 'MemoryAugmentedEncoder'
   ENCODER_DIM: 512
-  DECODER: 'DiffusionTransformerDecoder'
+  DECODER: 'MeshedDiffusionDecoder'
   DECODER_DIM: 512
   PREDICTOR: 'BitDiffusionPredictor'
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 80
   USE_EMA: True
-  WEIGHTS: "/home/jinyuda/change_rrg_diffusion/change_mimic_9_bit_mlp_eos_rl.pth"
+#  WEIGHTS: "/home/jinyuda/change_rrg_diffusion/change_mimic_9_bit_mlp_eos_rl.pth"
 
-  TCN:
-    NUM_CHANNELS: [512, 512, 512, 512]
-    KERNEL_SIZE: 3
-    DROPOUT: 0.2
 
   #################################### Token embedding ####################################
   TOKEN_EMBED:

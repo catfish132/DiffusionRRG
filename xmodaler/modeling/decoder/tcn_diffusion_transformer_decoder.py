@@ -30,12 +30,13 @@ class TcnDiffusionTransformerDecoder(TransformerDecoder):
             num_generation_layers=num_generation_layers,
             bert_generation_layers=bert_generation_layers
         )
-        self.tcn = tcn
+        # self.tcn = tcn
 
     @classmethod
     def from_config(cls, cfg):
         bert_generation_layers = nn.ModuleList(
-            [BertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
+            # [BertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
+            [TcnBertGenerationLayer(cfg) for _ in range(cfg.MODEL.BERT.NUM_GENERATION_LAYERS)]
         )
         return {
             "num_generation_layers": cfg.MODEL.BERT.NUM_GENERATION_LAYERS,
@@ -55,8 +56,8 @@ class TcnDiffusionTransformerDecoder(TransformerDecoder):
         for i, layer_module in enumerate(self.g_layers):
             u_tfeats = layer_module(u_tfeats, vfeats, ext_u_tmasks, ext_vmasks, t_history_states=None)
             u_tfeats_arr.append(u_tfeats)
-        u_tfeats = self.tcn(u_tfeats)
-        u_tfeats_arr.append(u_tfeats)
+        # u_tfeats = self.tcn(u_tfeats)
+        # u_tfeats_arr.append(u_tfeats)
         ret.update({kfg.U_HIDDEN_STATES: u_tfeats_arr})
 
         return ret
