@@ -448,6 +448,47 @@ class BertGenerationLayer(nn.Module):
         return layer_output
 
 
+# RM decoder layer
+class BertGenerationRmLayer(nn.Module):
+    @configurable
+    def __init__(
+            self,
+            *,
+            bert_attention,
+            bert_cross_attention,
+            bert_intermediate,
+            bert_output
+    ):
+        super(BertGenerationRmLayer, self).__init__()
+        self.self_attn = bert_attention
+        self.x_att = bert_cross_attention
+        self.intermediate = bert_intermediate
+        self.output = bert_output
+        self.memory_mlp = nn.Linear(3 * 512, 512)
+        self.fusion_mlp = nn.Linear(1024, 512)
+        self.fusion_layernorm = nn.LayerNorm(512)
+
+    @classmethod
+    def from_config(cls, cfg):
+        return {
+            "bert_attention": BertAttention(cfg),
+            "bert_cross_attention": BertCrossAttention(cfg),
+            "bert_intermediate": BertIntermediate(cfg),
+            "bert_output": BertOutput(cfg)
+        }
+
+    def forward(self, lang_feats, v_feats, lang_attention_mask=None, v_attention_mask=None, t_history_states=None,
+                memory=None):
+        x, _ = self.self_attn(lang_feats, lang_attention_mask, t_history_states)
+        memory = self.memory_mlp(memory)
+        x = self.fusion_layernorm(self.fusion_mlp(torch.cat([x, memory], dim=-1)))
+        x, _ = self.x_att(x, v_feats, v_feats, v_attention_mask, lang_attention_mask)
+        intermediate_output = self.intermediate(x)
+        layer_output = self.output(intermediate_output, x)
+
+        return layer_output
+
+
 class CircleBertGenerationLayer(nn.Module):
     @configurable
     def __init__(
@@ -501,6 +542,8 @@ class TcnBertGenerationLayer(nn.Module):
         self.intermediate = bert_intermediate
         self.output = bert_output
         self.tcn = tcn
+        self.sigmoid = nn.Sigmoid()
+        self.gate_linear = nn.Linear(1024, 512)
 
     @classmethod
     def from_config(cls, cfg):
@@ -514,8 +557,12 @@ class TcnBertGenerationLayer(nn.Module):
 
     def forward(self, lang_feats, v_feats, lang_attention_mask=None, v_attention_mask=None, t_history_states=None):
         x, _ = self.self_attn(lang_feats, lang_attention_mask, t_history_states)
+        x2 = self.tcn(x)
+        weight = torch.cat([x, x2], dim=-1)
+        gate = self.sigmoid(self.gate_linear(weight))
+        x = gate * x + (1 - gate) * x2
         x, _ = self.x_att(x, v_feats, v_feats, v_attention_mask, lang_attention_mask)
-        x = self.tcn(x)
+
         intermediate_output = self.intermediate(x)
         layer_output = self.output(intermediate_output, x)
 

@@ -4,10 +4,10 @@ DATASETS:
   VAL: ''
   TEST: 'RRGDiffusionDataset'
 
-OUTPUT_DIR: './rrg_output/stage1/mimic_midtcn_mlp_eos_2layertcn'
+OUTPUT_DIR: './rrg_output/stage1/mimic_midtcn_mlp_eos_after2layertcn'
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 64
+  TRAIN_BATCH_SIZE: 32
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
   ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"

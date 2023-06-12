@@ -20,4 +20,5 @@ from .circle_diffusion_transformer_decoder import CircleDiffusionTransformerDeco
 from .tcn_diffusion_transformer_decoder import TcnDiffusionTransformerDecoder
 from .memory_diffusion_transformer_decoder import MemoryDiffusionTransformerDecoder
 from .meshed_diffusion_decoder import MeshedDiffusionDecoder
+from .diffusion_transformer_rm_decoder import DiffusionTransformerRmDecoder
 __all__ = list(globals().keys())

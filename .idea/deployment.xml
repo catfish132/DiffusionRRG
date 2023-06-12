@@ -9,6 +9,20 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="58.57.119.80">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/Try/SCD-Net-main" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="8bitA100">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/root/Try/SCD-Net-main" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="LS204">
         <serverdata>
           <mappings>

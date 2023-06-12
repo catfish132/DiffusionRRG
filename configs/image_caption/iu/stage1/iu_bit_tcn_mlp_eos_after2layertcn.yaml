@@ -3,16 +3,16 @@ DATASETS:
   TRAIN: 'RRGDiffusionDataset'
   VAL: ''
   TEST: 'RRGDiffusionDataset'
-
-OUTPUT_DIR: './rrg_output/stage1/mimic_midtcn_mlp_eos_2layertcn'
+  NAME: 'IU X-RAY'
+OUTPUT_DIR: 'iu_output/stage1/bit_tcn_mlp_eos_after2layertcn'
 ###################################### DATALOADER ######################################
 DATALOADER:
-  TRAIN_BATCH_SIZE: 64
+  TRAIN_BATCH_SIZE: 16
   TEST_BATCH_SIZE: 128
   NUM_WORKERS: 12
-  ANNO_FOLDER: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_gts.pkl"
+  ANNO_FOLDER: "/home/jinyuda/dataset/medic/iu_xray/pkl/iu_gts.pkl"
   SEQ_PER_SAMPLE: 1
-  IMAGE_PATH: '/home/jinyuda/dataset/medic/mimic_cxr/images/'
+  IMAGE_PATH: "/home/jinyuda/dataset/medic/iu_xray/images/"
   SIMILAR_PATH: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mim_whole_bert.npy"
 
 ######################################### Engine #########################################
@@ -21,7 +21,7 @@ ENGINE:
 
 ######################################### MODEL #########################################
 MODEL:
-  VOCAB_SIZE: 4336 # include <BOS>/<EOS>  4336 for mimic(with 4335words in vecabulary) 761 for iu(with 760words in vecabulary）
+  VOCAB_SIZE: 761 # include <BOS>/<EOS>  4336 for mimic(with 4335words in vecabulary) 761 for iu(with 760words in vecabulary）
   META_ARCHITECTURE: 'RrgBitDiffusion'
   ENCODER: 'TransformerEncoder'
   ENCODER_DIM: 512
@@ -29,16 +29,14 @@ MODEL:
   DECODER_DIM: 512
   PREDICTOR: 'BitDiffusionPredictor'
   PRED_DROPOUT: 0.1
-  MAX_SEQ_LEN: 100
+  MAX_SEQ_LEN: 60
   USE_EMA: False
-#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/mimic_tcn/model_Epoch_00018_Iter_0152315.pth"
-
-
-  #################################### TCN ################################################
+#  WEIGHTS: "/home/jinyuda/Try/SCD-Net-main/rrg_output/stage1/xe_mlp_eos/model_Epoch_00042_Iter_0177701.pth"
   TCN:
     NUM_CHANNELS: [512, 512]
     KERNEL_SIZE: 3
     DROPOUT: 0.2
+
   #################################### Token embedding ####################################
   TOKEN_EMBED:
     NAME: 'BitEmbedding'
@@ -74,7 +72,7 @@ MODEL:
 ####################################### Optimizer #######################################
 SOLVER:
   NAME: 'Adam'
-  EPOCH: 60
+  EPOCH: 500
   CHECKPOINT_PERIOD: 1
   EVAL_PERIOD: 1
   BASE_LR: 0.0005  # 0.0005
@@ -90,7 +88,7 @@ SOLVER:
   GRAD_CLIP: 0.1
   GRAD_CLIP_TYPE: 'value'
   NORM_TYPE: 2.0
-  WRITE_PERIOD: 200
+  WRITE_PERIOD: 20
 
 ####################################### lr scheduler ####################################### 
 LR_SCHEDULER:
@@ -101,8 +99,9 @@ LR_SCHEDULER:
 
 ####################################### losses ####################################### 
 LOSSES:
-  NAMES: [ 'MSELoss', "LabelSmoothing","MlpEosLoss" ]
+  NAMES: [ 'MSELoss', "LabelSmoothing", "MlpEosLoss" ]
   LABELSMOOTHING: 0.1
+  CLS_LOSS_WEIGHT: 1.0
 
 ####################################### scorer ####################################### 
 SCORER:
@@ -124,10 +123,10 @@ DECODE_STRATEGY:
 ####################################### evaluation ####################################### 
 INFERENCE:
   NAME: 'RRGEvaler'
-  VOCAB: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/vocabulary.txt"
+  VOCAB: "/home/jinyuda/dataset/medic/iu_xray/pkl/vocabulary.txt"
   ID_KEY: 'image_id'
   VALUE: 'caption'
-  VAL_ANNFILE: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
-  TEST_ANNFILE: "/home/jinyuda/dataset/medic/mimic_cxr/pkl/mimic_id2gt.pkl"
+  VAL_ANNFILE: "/home/jinyuda/dataset/medic/iu_xray/pkl/iu_id2gtid.pkl"
+  TEST_ANNFILE: "/home/jinyuda/dataset/medic/iu_xray/pkl/iu_id2gtid.pkl"
   GENERATION_MODE: True
 

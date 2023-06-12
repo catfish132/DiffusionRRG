@@ -4,7 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Remote Python 3.7.16 (sftp://jinyuda@111.1.136.92:23335/home/jinyuda/.conda/envs/xmodaler/bin/python3.7)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Remote Python 3.9.12 (sftp://root@58.57.119.80:42377/root/miniconda3/bin/python3.9)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
