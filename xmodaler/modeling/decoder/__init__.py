@@ -21,4 +21,5 @@ from .tcn_diffusion_transformer_decoder import TcnDiffusionTransformerDecoder
 from .memory_diffusion_transformer_decoder import MemoryDiffusionTransformerDecoder
 from .meshed_diffusion_decoder import MeshedDiffusionDecoder
 from .diffusion_transformer_rm_decoder import DiffusionTransformerRmDecoder
+from .diffusion_transformer_conv_decoder import DiffusionTransformerConvDecoder
 __all__ = list(globals().keys())

@@ -30,7 +30,7 @@ from torch import nn
 from xmodaler.config import configurable
 from ..layers.create_act import get_activation
 from torch.nn.utils import weight_norm
-
+import torch.nn.functional as F
 
 class BertSelfAttention(nn.Module):
     @configurable
@@ -447,6 +447,39 @@ class BertGenerationLayer(nn.Module):
 
         return layer_output
 
+# ConvTransformerlayer
+class BertConvGenerationLayer(nn.Module):
+    @configurable
+    def __init__(
+            self,
+            *,
+            bert_attention,
+            bert_cross_attention,
+            bert_intermediate,
+            bert_output
+    ):
+        super(BertConvGenerationLayer, self).__init__()
+        self.self_attn = SelfAttentionConv()
+        self.x_att = bert_cross_attention
+        self.intermediate = bert_intermediate
+        self.output = bert_output
+
+    @classmethod
+    def from_config(cls, cfg):
+        return {
+            "bert_attention": BertAttention(cfg),
+            "bert_cross_attention": BertCrossAttention(cfg),
+            "bert_intermediate": BertIntermediate(cfg),
+            "bert_output": BertOutput(cfg)
+        }
+
+    def forward(self, lang_feats, v_feats, lang_attention_mask=None, v_attention_mask=None, t_history_states=None):
+        x = self.self_attn(lang_feats)
+        x, _ = self.x_att(x, v_feats, v_feats, v_attention_mask, lang_attention_mask)
+        intermediate_output = self.intermediate(x)
+        layer_output = self.output(intermediate_output, x)
+
+        return layer_output
 
 # RM decoder layer
 class BertGenerationRmLayer(nn.Module):
@@ -749,3 +782,85 @@ class TemporalConvNet(nn.Module):
         :return: size of (Batch, output_channel, seq_len)
         """
         return self.network(x)
+
+#convtransformer
+# Self Attention Class
+class SelfAttentionConv(nn.Module):
+    def __init__(self, k=512, headers=8, kernel_size=5, mask_next=False, mask_diag=False):
+        super().__init__()
+
+        self.k, self.headers, self.kernel_size = k, headers, kernel_size
+        self.mask_next = mask_next
+        self.mask_diag = mask_diag
+
+        h = headers
+
+        # Query, Key and Value Transformations
+
+        padding = (kernel_size - 1)
+        self.padding_opertor = nn.ConstantPad1d((padding, 0), 0)
+
+        self.toqueries = nn.Conv1d(k, k * h, kernel_size, padding=0, bias=True)
+        self.tokeys = nn.Conv1d(k, k * h, kernel_size, padding=0, bias=True)
+        self.tovalues = nn.Conv1d(k, k * h, kernel_size=1, padding=0, bias=False)  # No convolution operated
+
+        # Heads unifier
+        self.unifyheads = nn.Linear(k * h, k)
+
+    def forward(self, x):
+
+        # Extraction dimensions
+        b, t, k = x.size()  # batch_size, number_of_timesteps, number_of_time_series
+
+        # Checking Embedding dimension
+        assert self.k == k, 'Number of time series ' + str(k) + ' didn t much the number of k ' + str(
+            self.k) + ' in the initiaalization of the attention layer.'
+        h = self.headers
+
+        #  Transpose to see the different time series as different channels
+        x = x.transpose(1, 2)
+        x_padded = self.padding_opertor(x)
+
+        # Query, Key and Value Transformations
+        queries = self.toqueries(x_padded).view(b, k, h, t)
+        keys = self.tokeys(x_padded).view(b, k, h, t)
+        values = self.tovalues(x).view(b, k, h, t)
+
+        # Transposition to return the canonical format
+        queries = queries.transpose(1, 2)  # batch, header, time serie, time step (b, h, k, t)
+        queries = queries.transpose(2, 3)  # batch, header, time step, time serie (b, h, t, k)
+
+        values = values.transpose(1, 2)  # batch, header, time serie, time step (b, h, k, t)
+        values = values.transpose(2, 3)  # batch, header, time step, time serie (b, h, t, k)
+
+        keys = keys.transpose(1, 2)  # batch, header, time serie, time step (b, h, k, t)
+        keys = keys.transpose(2, 3)  # batch, header, time step, time serie (b, h, t, k)
+
+        # Weights
+        queries = queries / (k ** (.25))
+        keys = keys / (k ** (.25))
+
+        queries = queries.transpose(1, 2).contiguous().view(b * h, t, k)
+        keys = keys.transpose(1, 2).contiguous().view(b * h, t, k)
+        values = values.transpose(1, 2).contiguous().view(b * h, t, k)
+
+        weights = torch.bmm(queries, keys.transpose(1, 2))
+
+        ## Mask the upper & diag of the attention matrix
+        if self.mask_next:
+            if self.mask_diag:
+                indices = torch.triu_indices(t, t, offset=0)
+                weights[:, indices[0], indices[1]] = float('-inf')
+            else:
+                indices = torch.triu_indices(t, t, offset=1)
+                weights[:, indices[0], indices[1]] = float('-inf')
+
+        # Softmax
+        weights = F.softmax(weights, dim=2)
+
+        # Output
+        output = torch.bmm(weights, values)
+        output = output.view(b, h, t, k)
+        output = output.transpose(1, 2).contiguous().view(b, t, k * h)
+
+        return self.unifyheads(output)  # shape (b,t,k)

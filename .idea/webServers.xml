@@ -2,10 +2,10 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="d742ad8f-0f81-4097-8b19-84183bc3e613" name="LS204">
+      <webServer id="d742ad8f-0f81-4097-8b19-84183bc3e613" name="LS204(项目级别)">
         <fileTransfer accessType="SFTP" host="111.1.136.92" port="23338" sshConfigId="ede6c8d6-5549-45be-aa4e-69d176f66938" sshConfig="LS204" keyPair="true">
           <advancedOptions>
-            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
         </fileTransfer>
       </webServer>

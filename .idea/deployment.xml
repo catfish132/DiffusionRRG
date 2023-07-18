@@ -26,7 +26,7 @@
       <paths name="LS204">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/jinyuda/Try/SCD-Net-main" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/jinyuda/Try/SCD-Net-main" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

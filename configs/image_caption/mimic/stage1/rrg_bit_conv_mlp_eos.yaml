@@ -3,7 +3,7 @@ DATASETS:
   TRAIN: 'RRGDiffusionDataset'
   VAL: ''
   TEST: 'RRGDiffusionDataset'
-OUTPUT_DIR: 'rrg_output/stage1/xe_mlp_eos'
+OUTPUT_DIR: 'rrg_output/stage1/xe_conv_mlp_eos'
 SEED: 123
 ###################################### DATALOADER ######################################
 DATALOADER:
@@ -25,13 +25,13 @@ MODEL:
   META_ARCHITECTURE: 'RrgBitDiffusion'
   ENCODER: 'TransformerEncoder'
   ENCODER_DIM: 512
-  DECODER: 'DiffusionTransformerDecoder'
+  DECODER: 'DiffusionTransformerConvDecoder'
   DECODER_DIM: 512
   PREDICTOR: 'BitDiffusionPredictor'
   PRED_DROPOUT: 0.1
   MAX_SEQ_LEN: 100
-  USE_EMA: False
-  WEIGHTS: "/home/jinyuda/change_rrg_diffusion/change_mimic_9_bit_mlp_eos_rl.pth"
+  USE_EMA: True
+#  WEIGHTS: "/home/jinyuda/change_rrg_diffusion/change_mimic_9_bit_mlp_eos_rl.pth"
 
 
   #################################### Token embedding ####################################
