@@ -6,6 +6,7 @@ from xmodaler.modeling import add_config
 from xmodaler.engine.hooks import EvalHook
 from xmodaler.utils.events import EventStorage
 
+
 def setup(args):
     """
     Create configs and perform basic setups.
@@ -32,7 +33,7 @@ def setup(args):
 
 
 def test_one(trainer, weights_path, args):
-    trainer.checkpointer.load(weights_path) # checkpointables is None in order to use default checkpointables
+    trainer.checkpointer.load(weights_path)  # checkpointables is None in order to use default checkpointables
 
     next_iter = trainer.iter + 1
     epoch = int(os.path.basename(weights_path).split('_')[2])
@@ -49,6 +50,7 @@ def test_one(trainer, weights_path, args):
                 if isinstance(hook, EvalHook) and hook._stage == 'test':
                     hook._do_eval(epoch=epoch)
 
+
 def main(args):
     cfg = setup(args)
     trainer = build_engine(cfg)
@@ -60,7 +62,7 @@ def main(args):
         for weights_path in weights_paths:
             test_one(trainer, weights_path, args)
 
-    elif os.path.isfile(weights_path): 
+    elif os.path.isfile(weights_path):
         test_one(trainer, weights_path, args)
 
     else:
